@@ -1,0 +1,41 @@
+﻿Build started 10/31/2012 8:23:03 PM.
+     1>Project "D:\Project\EvoGeo\code\capture\3rd-party\qextserialport-1.2beta2\examples\uartassistant\uartassistant.vcxproj" on node 2 (build target(s)).
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(298,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
+     1>InitializeBuildStatus:
+         Creating "Win32\Debug\uartassistant.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ComputeCustomBuildOutput:
+         Creating directory "D:\Project\EvoGeo\code\capture\3rd-party\qextserialport-1.2beta2\examples\uartassistant\GeneratedFiles\".
+       CustomBuild:
+         Moc'ing dialog.h...
+         Moc'ing hled.h...
+         Moc'ing qextserialenumerator.h...
+         Moc'ing qextserialport.h...
+         Uic'ing dialog.ui...
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /IC:\Libraries\Qt\include\QtCore /IC:\Libraries\Qt\include\QtGui /IC:\Libraries\Qt\include /I..\..\src /IC:\Libraries\Qt\include\ActiveQt /Idebug /I. /IC:\Libraries\Qt\mkspecs\default /I.\GeneratedFiles /Zi /nologo /W3 /WX- /Od /Oy- /D _WINDOWS /D UNICODE /D WIN32 /D QT_LARGEFILE_SUPPORT /D QT_DLL /D QT_GUI_LIB /D QT_CORE_LIB /D QT_HAVE_MMX /D QT_HAVE_3DNOW /D QT_HAVE_SSE /D QT_HAVE_MMXEXT /D QT_HAVE_SSE2 /D QT_THREAD_SUPPORT /Gm- /EHsc /MDd /GS- /fp:precise /Zc:wchar_t- /Zc:forScope /GR /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Debug\moc_dialog.cpp Debug\moc_hled.cpp dialog.cpp hled.cpp main.cpp ..\..\src\qextserialenumerator.cpp ..\..\src\qextserialenumerator_win.cpp ..\..\src\qextserialport.cpp ..\..\src\qextserialport_win.cpp -Zm200 -w34100 -w34189 
+         moc_dialog.cpp
+         moc_hled.cpp
+         dialog.cpp
+         hled.cpp
+         main.cpp
+         qextserialenumerator.cpp
+         qextserialenumerator_win.cpp
+         qextserialport.cpp
+         qextserialport_win.cpp
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"debug\\uartassistant.exe" /NOLOGO /LIBPATH:C:\Libraries\Qt\lib /LIBPATH:C:\Libraries\Qt\lib C:\Libraries\Qt\lib\qtmaind.lib setupapi.lib advapi32.lib user32.lib C:\Libraries\Qt\lib\QtGuid4.lib C:\Libraries\Qt\lib\QtCored4.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Win32\Debug\uartassistant.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\Project\EvoGeo\code\capture\3rd-party\qextserialport-1.2beta2\examples\uartassistant\debug\uartassistant.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /MACHINE:X86 Win32\Debug\moc_dialog.obj
+         Win32\Debug\moc_hled.obj
+         Win32\Debug\dialog.obj
+         Win32\Debug\hled.obj
+         Win32\Debug\main.obj
+         Win32\Debug\qextserialenumerator.obj
+         Win32\Debug\qextserialenumerator_win.obj
+         Win32\Debug\qextserialport.obj
+         Win32\Debug\qextserialport_win.obj "/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" 
+     1>QtGuid4.lib(QtGuid4.dll) : fatal error LNK1112: module machine type 'x64' conflicts with target machine type 'X86'
+     1>Done Building Project "D:\Project\EvoGeo\code\capture\3rd-party\qextserialport-1.2beta2\examples\uartassistant\uartassistant.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:15.75
