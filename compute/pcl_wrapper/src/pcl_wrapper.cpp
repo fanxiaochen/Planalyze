@@ -1,6 +1,9 @@
 #include "pcl_wrapper_types.h"
 #include "pcl_wrapper_exports.h"
 
+#include <pcl/pcl_base.h>
+#include <pcl/impl/pcl_base.hpp>
+
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/impl/normal_3d.hpp>
 
@@ -8,6 +11,7 @@
 #include <pcl/kdtree/impl/kdtree_flann.hpp>
 
 #include <pcl/search/kdtree.h>
+#include <pcl/search/impl/kdtree.hpp>
 #include <pcl/search/organized.h>
 #include <pcl/search/impl/organized.hpp>
 
