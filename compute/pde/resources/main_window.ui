@@ -109,14 +109,17 @@
     <addaction name="separator"/>
     <addaction name="actionBatchRenameViews"/>
     <addaction name="actionBatchRenameFrames"/>
-    <addaction name="actionBatchExtractPoints"/>
-    <addaction name="actionBatchVirtualScan"/>
-    <addaction name="actionExtractPlant"/>
     <addaction name="separator"/>
-    <addaction name="actionRemoveBadFrames"/>
+    <addaction name="actionExtractPlant"/>
+    <addaction name="actionBatchExtractPoints"/>
     <addaction name="actionExtractKeyFrames"/>
     <addaction name="actionRotateCloud"/>
+    <addaction name="actionConvertPcdToPlainText"/>
     <addaction name="separator"/>
+    <addaction name="actionBatchVirtualScan"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemoveBadFrames"/>
+    <addaction name="actionRemoveErrorPoints"/>
    </widget>
    <widget class="QMenu" name="menuParameter">
     <property name="title">
@@ -546,6 +549,16 @@
   <action name="actionAbsoluteClassify">
    <property name="text">
     <string>Absolute Classify</string>
+   </property>
+  </action>
+  <action name="actionConvertPcdToPlainText">
+   <property name="text">
+    <string>Convert Pcd To Plain Text</string>
+   </property>
+  </action>
+  <action name="actionRemoveErrorPoints">
+   <property name="text">
+    <string>Remove Error Points</string>
    </property>
   </action>
  </widget>

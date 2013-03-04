@@ -44,7 +44,8 @@ ParameterManager::ParameterManager(void)
   stem_length_threshold_(new DoubleParameter("Stem Skeleton Length", "Stem Skeleton Length", 8, 0.5, 32, 0.5)),
   curvature_quantize_(new DoubleParameter("Curvature Quantize", "Threshold Quantize", 0.0015, 0.00001, 0.1, 0.00001)),
   stem_thickness_(new DoubleParameter("Stem Thickness", "Stem Thickness", 2.0, 0.1, 16.0, 0.1)),
-  triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 1.5, 1.0, 8.0, 0.1))
+  triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 1.5, 1.0, 8.0, 0.1)),
+  radius_(new IntParameter("Radius", "Radius", 500, 500, 1000, 1))
 {
 }
 
@@ -459,6 +460,32 @@ bool ParameterManager::getRotateCloudParameters(int& angle, int& start_frame, in
     return false;
 
   angle = *angle_;
+  getFrameparametersImpl(start_frame, end_frame, with_frames);
+
+  return true;
+}
+
+bool ParameterManager::getConvertPcdParameters(int& start_frame, int& end_frame, bool with_frames)
+{
+  ParameterDialog parameter_dialog("Convert Pcd Parameters", MainWindow::getInstance());
+  addFrameParameters(&parameter_dialog, with_frames);
+  if(!parameter_dialog.exec() == QDialog::Accepted)
+    return false;
+
+  getFrameparametersImpl(start_frame, end_frame, with_frames);
+
+  return true;
+}
+
+bool ParameterManager::getRemoveErrorPointsParameters(int& start_frame, int& end_frame, int& radius, bool with_frames)
+{
+  ParameterDialog parameter_dialog("Remove Error Points Parameters", MainWindow::getInstance());
+  parameter_dialog.addParameter(radius_);
+  addFrameParameters(&parameter_dialog, with_frames);
+  if(!parameter_dialog.exec() == QDialog::Accepted)
+    return false;
+
+  radius = *radius_;
   getFrameparametersImpl(start_frame, end_frame, with_frames);
 
   return true;

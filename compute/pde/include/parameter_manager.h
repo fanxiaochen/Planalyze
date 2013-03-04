@@ -84,6 +84,10 @@ public:
 
   bool getRotateCloudParameters(int& angle, int& start_frame, int& end_frame, bool with_frames = true);
 
+  bool getConvertPcdParameters(int& start_frame, int& end_frame, bool with_frames = true);
+
+  bool getRemoveErrorPointsParameters(int& start_frame, int& end_frame, int& radius, bool with_frames = true);
+
   bool getAllParameters(void);
 
 protected:
@@ -117,6 +121,8 @@ private:
   IntParameter*                                       stop_delta_;
   IntParameter*                                       camera_delta_;
   IntParameter*                                       frame_multiple_;
+
+  IntParameter*                                       radius_;
 
   IntParameter*                                       angle_;
 
