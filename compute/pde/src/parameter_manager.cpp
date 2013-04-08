@@ -17,7 +17,7 @@ ParameterManager::ParameterManager(void)
   virtual_scan_distance_(new DoubleParameter("Virtual Scan Distance", "Virtual Scan Distance", 200, 10, 1000, 1.0)),
   virtual_scan_resolution_(new DoubleParameter("Virtual Scan Resolution", "Virtual Scan Resolution", 1, 0.01, 100, 0.01)),
   registration_max_iterations_(new IntParameter("Max Iterations", "Max Iterations", 64, 1, 1024)),
-  registration_max_distance_(new DoubleParameter("Max Distance", "Max Distance", 4, 1, 16, 1.0)),
+  registration_max_distance_(new DoubleParameter("Max Distance", "Max Distance", 4, 1, 128, 1.0)),
   rename_offset_(new IntParameter("Rename Offset", "Rename Offset", 0, -11, 11, 1)),
   rename_frame_offset_(new IntParameter("Rename Frame Offset", "Rename Frame Offset", 0, -10000, 10000, 1)),
   frame_offset_(new IntParameter("Frame Offset", "Frame Offset", 1, -10000, 10000, 1)),

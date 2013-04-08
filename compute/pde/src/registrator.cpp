@@ -541,10 +541,10 @@ void Registrator::registrationICP(int max_iterations, double max_distance, int f
   // Set the euclidean distance difference epsilon (criterion 3)
   icp.setEuclideanFitnessEpsilon(64);
 
-  model->getPointCloud(frame, 0)->getTransformedPlantPoints(*target);
+  model->getPointCloud(frame, 0)->getTransformedPoints(*target);
   for (size_t i = 0, i_end = point_clouds.size(); i < i_end; ++ i)
   {
-    point_clouds[i]->getTransformedPlantPoints(*source);
+    point_clouds[i]->getTransformedPoints(*source);
 
     icp.setInputSource(source);
     icp.setInputTarget(target);
