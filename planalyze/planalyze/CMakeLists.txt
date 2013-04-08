@@ -179,7 +179,7 @@ IF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
   SET (srcs ${srcs} ${uis})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
-set(exe_name analyze)
+set(exe_name planalyze)
 add_executable(${exe_name} ${ui_srcs} ${moc_srcs} ${resource_srcs} ${srcs} ${3rd_srcs} ${incs} ${3rd_incs} ${impl_incs})
 target_link_libraries(${exe_name} pcl_wrapper ${OPENGL_LIBRARIES} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${QT_QTOPENGL_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTXML_LIBRARY} ${QT_QTCORE_LIBRARY} ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${ThirdParty_LIBS} ${QEXTSERIALPORT_LIBRARY})
 
