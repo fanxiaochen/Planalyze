@@ -26,28 +26,33 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(3rdParty)
-find_package(OpenGL REQUIRED opencv_core)
+find_package(Qextserialport REQUIRED)
+include_directories(${QEXTSERIALPORT_INCLUDE_DIR})
+
+find_package(OpenGL REQUIRED)
+
 find_package(Qt4 REQUIRED QtCore QtGui QtXml QtOpenGL)
+include(${QT_USE_FILE})
+
 find_package(Boost REQUIRED thread date_time system chrono)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 endif(Boost_FOUND)
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-include(${QT_USE_FILE})
 
 # Set Qt files and resources here  
-set(uis			resources/main_window.ui)
-set(moc_incs 	include/main_window.h
-				include/parameter_dialog.h
-				include/pattern_projector.h
-        include/plain_text_viewer.h
-		    include/image_grabber.h
-				include/turn_table.h)
+set(uis       resources/main_window.ui)
+set(moc_incs  include/main_window.h
+              include/parameter_dialog.h
+              include/pattern_projector.h
+              include/plain_text_viewer.h
+              include/image_grabber.h
+              include/turn_table.h
+              )
+
 set(resources	resources/main_window.qrc)
 
 # Qt stuff
@@ -55,24 +60,23 @@ QT4_WRAP_UI(ui_srcs ${uis})
 QT4_WRAP_CPP(moc_srcs ${moc_incs} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
 QT4_ADD_RESOURCES(resource_srcs ${resources})
 
-set(incs 		${moc_incs}
-        include/image_viewer.h
-        include/parameter.h
-				)
+set(incs    ${moc_incs}
+            include/image_viewer.h
+            include/parameter.h
+            )
 
-set(srcs	    src/main.cpp
-				src/main_window.cpp
-				src/parameter.cpp
-				src/parameter_dialog.cpp
-				src/turn_table.cpp
-				src/pattern_projector.cpp
-        src/image_grabber.cpp
-        src/image_viewer.cpp
-        src/plain_text_viewer.cpp
-				)
+set(srcs  src/main.cpp
+          src/main_window.cpp
+          src/parameter.cpp
+          src/parameter_dialog.cpp
+          src/turn_table.cpp
+          src/pattern_projector.cpp
+          src/image_grabber.cpp
+          src/image_viewer.cpp
+          src/plain_text_viewer.cpp
+          )
 
-set(impl_incs	include/impl/parameter.hpp
-				)
+set(impl_incs include/impl/parameter.hpp)
 
 # Organize files
 SOURCE_GROUP("Resources" FILES ${uis} ${resources})
@@ -89,4 +93,4 @@ ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
 add_executable(EvoGeoCapture 	${srcs} ${ui_srcs} ${moc_srcs} ${resource_srcs} ${srcs} ${incs} ${impl_incs})
 
-target_link_libraries(EvoGeoCapture  ${ThirdParty_LIBS} ${OPENGL_LIBRARIES} ${QT_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(EvoGeoCapture  ${ThirdParty_LIBS} ${OPENGL_LIBRARIES} ${QT_LIBRARIES} ${Boost_LIBRARIES} ${QEXTSERIALPORT_LIBRARY})
