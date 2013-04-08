@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
   : QMainWindow(parent, flags),
   turn_table_(new TurnTable),
   image_viewer_(new ImageViewer),
-  image_grabber_(new ImageGrabber),
+  image_grabber_(new ImageGrabber(this)),
   plain_text_viewer_(new PlainTextViewer),
   pattern_projector_(new PatternProjector),
   current_frame_(0),
@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
   view_timer_id_(0),
   frame_time_("Frame Period", "The time gap between frames", 300, 120, 1200, 60),
   start_frame_("Start Frame", "Which frame index to start with", 0, 0, 10000, 1),
-  view_time_("View Time", "How long is allocated for each view", 7.5, 7.5, 15, 0.5)
+  view_time_("View Time", "How long is allocated for each view", 15, 10, 20, 0.5)
 {
   ui_.setupUi(this);
   ui_.actionStop->setDisabled(true);
@@ -178,7 +178,7 @@ void MainWindow::startCapture()
   saveParameters();
   ui_.actionStop->setEnabled(true);
 
-  frame_timer_id_ = startTimer(5*60*1000);
+  frame_timer_id_ = startTimer(10008*frame_time_);
   view_timer_id_ = startTimer(1000*view_time_);
 }
 
@@ -306,14 +306,14 @@ void MainWindow::viewImage(int view, int stripe)
   if (is_mono)
   {
     QVector<QRgb> color_table;
-    for (size_t i = 0; i < 256; ++ i)
+    for (int i = 0; i < 256; ++ i)
       color_table.push_back(qRgb(i, i, i));
     q_image.setColorTable(color_table);
   }
 
-  for (size_t i = 0, i_end = f_image.GetCols(); i < i_end; ++ i)
+  for (unsigned int i = 0, i_end = f_image.GetCols(); i < i_end; ++ i)
   {
-    for (size_t j = 0, j_end = f_image.GetRows(); j < j_end; ++ j)
+    for (unsigned int j = 0, j_end = f_image.GetRows(); j < j_end; ++ j)
     {
       if (is_mono)
       {

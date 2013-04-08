@@ -29,6 +29,11 @@ find_package(3rdParty)
 find_package(Qextserialport REQUIRED)
 include_directories(${QEXTSERIALPORT_INCLUDE_DIR})
 
+find_package(OpenSceneGraph REQUIRED osgViewer osgText osgDB osgGA osgQt osgManipulator osgUtil)
+if(OPENSCENEGRAPH_FOUND)
+    include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+endif(OPENSCENEGRAPH_FOUND)
+
 find_package(OpenGL REQUIRED)
 
 find_package(Qt4 REQUIRED QtCore QtGui QtXml QtOpenGL)

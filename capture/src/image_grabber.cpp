@@ -3,7 +3,10 @@
 #include <QDir>
 #include <QMutexLocker>
 #include <QApplication>
+#include <QProgressBar>
 #include <QElapsedTimer>
+#include <QFutureWatcher>
+#include <QtConcurrentRun>
 
 #include <boost/thread/thread.hpp>
 
@@ -22,8 +25,9 @@ void PrintError( Error error, const std::string& stage)
   std::cout << std::endl;
 }
 
-ImageGrabber::ImageGrabber(void)
-  :camera_(NULL),
+ImageGrabber::ImageGrabber(MainWindow* main_window)
+  :main_window_(main_window),
+  camera_(NULL),
   guid_(NULL),
   stripe_shutter_("Stripe Shutter", "Camera shutter value for the stripes", 30, 0.1, 60, 0.1),
   snapshot_shutter_("Snapshot Shutter", "Camera shutter value for the snapshot", 60, 0.1, 60, 0.1),
@@ -182,6 +186,7 @@ void ImageGrabber::grabSnapshot(int view)
   size_t stripe_num = frame_images_[view].size()-1;
   grabImpl(view, stripe_num);
   emit snapshotGrabbed();
+  emit timeToView(view, (int)(stripe_num));
 
   return;
 }
@@ -190,6 +195,7 @@ void ImageGrabber::grabStripe(int view, int stripe)
 {
   grabImpl(view, stripe);
   emit stripeGrabbed(stripe);
+  emit timeToView(view, stripe);
 
   bool is_last_stripe = (stripe == frame_images_[view].size()-2);
   if (is_last_stripe)
@@ -198,7 +204,7 @@ void ImageGrabber::grabStripe(int view, int stripe)
   return;
 }
 
-void ImageGrabber::save(const QString& images_folder, const QString& points_folder)
+void ImageGrabber::saveImpl(const QString& images_folder, const QString& points_folder)
 {
   QMutexLocker locker(&mutex_);
 
@@ -226,12 +232,30 @@ void ImageGrabber::save(const QString& images_folder, const QString& points_fold
       error = frame_images_[i][j].Save(filename.c_str(), &jpeg_option);
       if (error != PGRERROR_OK)
         PrintError(error, "Save");
-
-      emit timeToView(i, j);
-      boost::this_thread::sleep(boost::posix_time::milliseconds(50));
     }
-    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+
+    emit stripesSaved((int)(i));
   }
+
+  return;
+}
+
+void ImageGrabber::save(const QString& images_folder, const QString& points_folder)
+{
+  QProgressBar* progress_bar = new QProgressBar(main_window_);
+  progress_bar->setRange(0, (int)(frame_images_.size()-1));
+  progress_bar->setValue(0);
+  progress_bar->setFormat(QString("Saving stripes: %p% completed"));
+  progress_bar->setTextVisible(true);
+  main_window_->statusBar()->addPermanentWidget(progress_bar);
+
+  QObject::connect(this, SIGNAL(stripesSaved(int)), progress_bar, SLOT(setValue(int)));
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  QObject::connect(watcher, SIGNAL(finished()), watcher, SLOT(deleteLater()));
+  QObject::connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
+
+  watcher->setFuture(QtConcurrent::run(this, &ImageGrabber::saveImpl, images_folder, points_folder));
 
   return;
 }

@@ -16,7 +16,7 @@ class ImageGrabber : public QObject
   Q_OBJECT
 
 public:
-  ImageGrabber(void);
+  ImageGrabber(MainWindow* main_window);
   ~ImageGrabber(void);
 
   bool init(size_t stripe_num, size_t view_num);
@@ -30,6 +30,7 @@ public slots:
 signals:
   void snapshotGrabbed(void);
   void stripeGrabbed(int stripe);
+  void stripesSaved(int stripe);
   void timeToView(int view, int stripe);
 
 public:
@@ -45,11 +46,13 @@ private:
   FlyCapture2::Camera     *camera_;
   FlyCapture2::PGRGuid    *guid_;
   QMutex                  mutex_;
+  MainWindow*             main_window_;
 
   bool connect();
   bool disconnect();
   bool setCamera(bool is_snapshot);
   void grabImpl(size_t view, size_t stripe);
+  void saveImpl(const QString& image_folder, const QString& points_folder);
 };
 
 #endif /*IMAGE_GRABBER_H*/
