@@ -20,7 +20,7 @@ PatternProjector::PatternProjector()
   strip_map["800x600x30"] = "800x600x30";
   strip_map["1024x768x24"] = "1024x768x24";
   strip_map["1024x768x30"] = "1024x768x30";
-  stripe_set_.setCadidates(strip_map);
+  stripe_set_.setCandidates(strip_map);
 
   setAutoBufferSwap(false);
 

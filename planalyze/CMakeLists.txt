@@ -43,4 +43,3 @@ endif(WIN32)
 
 add_subdirectory(pcl_wrapper)
 add_subdirectory(analyze)
-add_subdirectory(capture)

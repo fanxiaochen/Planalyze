@@ -5,25 +5,17 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(3rdParty)
+find_package(Qextserialport REQUIRED)
+include_directories(${QEXTSERIALPORT_INCLUDE_DIR})
+
+find_package(OpenGL REQUIRED)
+
 find_package(Boost REQUIRED system thread)
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+endif(Boost_FOUND)
+
 find_package(CGAL REQUIRED)
-find_package(OpenSceneGraph REQUIRED osgViewer osgText osgDB osgGA osgQt osgManipulator osgUtil)
-find_package(Qt4 REQUIRED QtCore QtGui QtOpenGL QtXml)
-find_package(PCL REQUIRED common io registration kdtree search)
-
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${CGAL_LIBRARIES_DIR})
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/gco)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/alg)
-include_directories(${PROJECT_SOURCE_DIR}/pcl_wrapper/include)
-
-if(OPENSCENEGRAPH_FOUND)
-    include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
-endif(OPENSCENEGRAPH_FOUND)
-
 if(CGAL_FOUND)
     include_directories(${CGAL_INCLUDE_DIRS})
   set(CMAKE_MODULE_PATH ${CGAL_DIR}/cmake/modules)
@@ -35,9 +27,22 @@ if(CGAL_FOUND)
   endif(GMP_FOUND)
 endif(CGAL_FOUND)
 
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-endif(Boost_FOUND)
+find_package(OpenSceneGraph REQUIRED osgViewer osgText osgDB osgGA osgQt osgManipulator osgUtil)
+if(OPENSCENEGRAPH_FOUND)
+    include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+endif(OPENSCENEGRAPH_FOUND)
+
+find_package(Qt4 REQUIRED QtCore QtGui QtOpenGL QtXml)
+find_package(PCL REQUIRED common io registration kdtree search)
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${CGAL_LIBRARIES_DIR})
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/gco)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/alg)
+include_directories(${PROJECT_SOURCE_DIR}/pcl_wrapper/include)
 
 include(${QT_USE_FILE})
 
@@ -54,6 +59,11 @@ set(moc_incs  include/main_window.h
               include/task_dispatcher.h
               include/progress_bar.h
               include/sketch_handler.h
+			  include/parameter_dialog.h
+              include/pattern_projector.h
+              include/plain_text_viewer.h
+              include/image_grabber.h
+              include/turn_table.h
               )
 set(resources  resources/main_window.qrc)
 
@@ -87,6 +97,7 @@ set(incs    ${moc_incs}
             include/math_solvers.h
             include/information.h
             include/mesh_model.h
+			include/image_viewer.h
 
             )
 
@@ -137,6 +148,11 @@ set(srcs    src/main.cpp
             src/mesh_model.cpp
             src/progress_bar.cpp
             src/sketch_handler.cpp
+			src/turn_table.cpp
+			src/pattern_projector.cpp
+			src/image_grabber.cpp
+			src/image_viewer.cpp
+			src/plain_text_viewer.cpp
             )
 
 set(3rd_srcs  3rd-party/gco/GCoptimization.cpp
@@ -165,7 +181,7 @@ ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
 set(exe_name analyze)
 add_executable(${exe_name} ${ui_srcs} ${moc_srcs} ${resource_srcs} ${srcs} ${3rd_srcs} ${incs} ${3rd_incs} ${impl_incs})
-target_link_libraries(${exe_name} pcl_wrapper ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${QT_QTOPENGL_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTXML_LIBRARY} ${QT_QTCORE_LIBRARY} ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${ThirdParty_LIBS})
+target_link_libraries(${exe_name} pcl_wrapper ${OPENGL_LIBRARIES} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${QT_QTOPENGL_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTXML_LIBRARY} ${QT_QTCORE_LIBRARY} ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${ThirdParty_LIBS} ${QEXTSERIALPORT_LIBRARY})
 
 if(WIN32 AND MSVC)
   set_target_properties(${exe_name} PROPERTIES LINK_FLAGS_RELEASE /OPT:REF)

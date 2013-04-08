@@ -97,9 +97,15 @@ public:
   virtual void setEditorData(QWidget *editor);
   virtual std::pair<QVariant, int> toModelData();
 
+  template <class T>
+  void setCandidates(const std::map<T, std::string>& candidates)
+  {
+    candidates_ = candidates;
+  }
+
 protected:
   virtual void getEditorData(QWidget *editor);
-  const std::map<T, std::string> candidates_;
+  std::map<T, std::string> candidates_;
 };
 
 class DoubleParameter : public Parameter

@@ -3,9 +3,11 @@
 #define MainWindow_H
 
 #include <cassert>
+#include <QThread>
 #include <QStringList>
 #include <QMainWindow>
 
+#include "parameter.h"
 #include "ui_main_window.h"
 
 class QComboBox;
@@ -19,6 +21,11 @@ class OSGViewerWidget;
 class FileViewerWidget;
 class PovRayVisitor;
 class SkeletonSketcher;
+class TurnTable;
+class ImageViewer;
+class ImageGrabber;
+class PlainTextViewer;
+class PatternProjector;
 
 class MainWindow : public QMainWindow
 {
@@ -47,9 +54,15 @@ public:
   void updateStatusMessage(const QString& message);
 
 signals:
+  void timeToGrab(int current_view, double time);
+  void timeToSave(const QString& image_folder, const QString& points_folder);
   void timeToUpdateStatusMessage(const QString& message);
 
 public slots:
+  void onImagesGrabbed(void);
+  void showImageMessage(const QString& image);
+  void viewImage(int view, int stripe);
+
   void updateCurrentFile(const QString& filename);
   bool setWorkspace(void);
   void openRecentWorkspace();
@@ -60,6 +73,7 @@ public slots:
   void saveParameters(void);
 
 protected:
+  virtual void timerEvent(QTimerEvent *event);
   virtual void closeEvent(QCloseEvent *event);
   virtual void keyPressEvent(QKeyEvent * event);
 
@@ -68,6 +82,15 @@ private:
   void updateRecentWorkspaces();
   void loadSettings();
   void saveSettings();
+  void saveStatusLog();
+  QString getImagesFolder();
+  QString getPointsFolder();
+  void showStatusMessage(const QString& message);
+
+private slots:
+  void recordWaterEvent(void);
+  void startCapture(void);
+  void stopCapture(void);
 
 private:
   Ui::MainWindowClass             ui_;
@@ -89,6 +112,24 @@ private:
   static const int                MaxRecentWorkspaces = 10;
   QStringList                     recent_workspaces_;
   QAction*                        action_recent_workspaces_[MaxRecentWorkspaces];
+
+  TurnTable               *turn_table_;
+  ImageViewer             *image_viewer_;
+  ImageGrabber            *image_grabber_;
+  PlainTextViewer         *plain_text_viewer_;
+  PatternProjector        *pattern_projector_;
+
+  int                     current_frame_;
+  int                     current_view_;
+
+  int                     frame_timer_id_;
+  int                     view_timer_id_;
+
+  IntParameter            frame_time_;
+  IntParameter            start_frame_;
+  DoubleParameter            view_time_;
+
+  QThread                 grabber_thread_;
 };
 
 class MainWindowInstancer

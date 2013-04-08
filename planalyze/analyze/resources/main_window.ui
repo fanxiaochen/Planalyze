@@ -148,12 +148,21 @@
     <addaction name="actionDecomposeStems"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuCapture">
+    <property name="title">
+     <string>Capture</string>
+    </property>
+    <addaction name="actionStartCapture"/>
+    <addaction name="actionStopCapture"/>
+    <addaction name="actionWaterPlant"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPointCloud"/>
    <addaction name="menuView"/>
    <addaction name="menuBatch"/>
    <addaction name="menuGo_Back"/>
    <addaction name="menuParameter"/>
+   <addaction name="menuCapture"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="mainToolBar">
@@ -546,6 +555,21 @@
   <action name="actionAbsoluteClassify">
    <property name="text">
     <string>Absolute Classify</string>
+   </property>
+  </action>
+  <action name="actionStartCapture">
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionStopCapture">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionWaterPlant">
+   <property name="text">
+    <string>Water</string>
    </property>
   </action>
  </widget>

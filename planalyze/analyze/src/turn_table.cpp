@@ -14,7 +14,7 @@ TurnTable::TurnTable(void)
   port_map["COM4"] = "COM4";
   port_map["COM5"] = "COM5";
   port_map["COM6"] = "COM6";
-  com_port_.setCadidates(port_map);
+  com_port_.setCandidates(port_map);
 }
 
 TurnTable::~TurnTable(void)
