@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowClass</class>
+ <widget class="QMainWindow" name="MainWindowClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1301</width>
+    <height>739</height>
+   </rect>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1301</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuRecentWorkspaces">
+     <property name="title">
+      <string>Recent Workspaces</string>
+     </property>
+    </widget>
+    <addaction name="actionSetWorkspace"/>
+    <addaction name="menuRecentWorkspaces"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveRegistrator"/>
+    <addaction name="actionSaveRegisteredPoints"/>
+    <addaction name="separator"/>
+    <addaction name="actionPOVRaySnapshot"/>
+    <addaction name="actionPOVRayAnimation"/>
+    <addaction name="actionPovRayFrames"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadMeshModel"/>
+    <addaction name="actionSaveSceneAsObj"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadCamera"/>
+    <addaction name="actionSaveCamera"/>
+   </widget>
+   <widget class="QMenu" name="menuPointCloud">
+    <property name="title">
+     <string>PointCloud</string>
+    </property>
+    <addaction name="actionRegistrationICP"/>
+    <addaction name="actionRegistrationLUM"/>
+    <addaction name="actionRefineAxis"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>Rendering</string>
+    </property>
+    <addaction name="actionIncreasePointSize"/>
+    <addaction name="actionDecreasePointSize"/>
+    <addaction name="actionIncreaseLineWidth"/>
+    <addaction name="actionDecreaseLineWidth"/>
+    <addaction name="separator"/>
+    <addaction name="actionRenderPlant"/>
+    <addaction name="actionRenderPot"/>
+    <addaction name="actionRenderNoise"/>
+    <addaction name="actionRenderLeaves"/>
+    <addaction name="actionRenderStems"/>
+    <addaction name="separator"/>
+    <addaction name="actionRenderNormals"/>
+    <addaction name="actionRenderOrientations"/>
+    <addaction name="actionRenderTriangles"/>
+    <addaction name="separator"/>
+    <addaction name="actionRenderOrgans"/>
+    <addaction name="actionRenderStemGraph"/>
+    <addaction name="separator"/>
+    <addaction name="actionForceCenterScene"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuBatch">
+    <property name="title">
+     <string>Batch</string>
+    </property>
+    <addaction name="actionGeneratePoints"/>
+    <addaction name="actionBatchRegistration"/>
+    <addaction name="separator"/>
+    <addaction name="actionBatchEstimateNormal"/>
+    <addaction name="actionBatchEstimateThickness"/>
+    <addaction name="actionBatchEstimateOrientation"/>
+    <addaction name="separator"/>
+    <addaction name="actionCancelTasks"/>
+    <addaction name="separator"/>
+    <addaction name="actionBatchRenameViews"/>
+    <addaction name="actionBatchRenameFrames"/>
+    <addaction name="separator"/>
+    <addaction name="actionExtractPlant"/>
+    <addaction name="actionBatchExtractPoints"/>
+    <addaction name="actionExtractKeyFrames"/>
+    <addaction name="actionRotateCloud"/>
+    <addaction name="actionConvertPcdToPlainText"/>
+    <addaction name="separator"/>
+    <addaction name="actionBatchVirtualScan"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemoveBadFrames"/>
+    <addaction name="actionRemoveErrorPoints"/>
+   </widget>
+   <widget class="QMenu" name="menuParameter">
+    <property name="title">
+     <string>Parameter</string>
+    </property>
+    <addaction name="actionParameterMaster"/>
+    <addaction name="actionEnableInformation"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveParameters"/>
+    <addaction name="actionLoadParameters"/>
+    <addaction name="separator"/>
+    <addaction name="actionSkeletonSketcher"/>
+   </widget>
+   <widget class="QMenu" name="menuGo_Back">
+    <property name="title">
+     <string>Operations</string>
+    </property>
+    <addaction name="actionForwardClassify"/>
+    <addaction name="actionBackwardClassify"/>
+    <addaction name="separator"/>
+    <addaction name="actionFSmoothLeaves"/>
+    <addaction name="actionBSmoothLeaves"/>
+    <addaction name="separator"/>
+    <addaction name="actionFSmoothStems"/>
+    <addaction name="actionBSmoothStems"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbsoluteClassify"/>
+    <addaction name="actionDecomposeLeaves"/>
+    <addaction name="actionDecomposeStems"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuCapture">
+    <property name="title">
+     <string>Capture</string>
+    </property>
+    <addaction name="actionStartCapture"/>
+    <addaction name="actionStopCapture"/>
+    <addaction name="actionWaterPlant"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuPointCloud"/>
+   <addaction name="menuView"/>
+   <addaction name="menuBatch"/>
+   <addaction name="menuGo_Back"/>
+   <addaction name="menuParameter"/>
+   <addaction name="menuCapture"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionSkeletonSketcher"/>
+   <addaction name="separator"/>
+   <addaction name="actionRenderPlant"/>
+   <addaction name="actionRenderPot"/>
+   <addaction name="actionRenderNoise"/>
+   <addaction name="actionRenderLeaves"/>
+   <addaction name="actionRenderStems"/>
+   <addaction name="separator"/>
+   <addaction name="actionRenderNormals"/>
+   <addaction name="actionRenderOrientations"/>
+   <addaction name="actionRenderTriangles"/>
+   <addaction name="separator"/>
+   <addaction name="actionRenderOrgans"/>
+   <addaction name="actionRenderStemGraph"/>
+   <addaction name="separator"/>
+   <addaction name="separator"/>
+   <addaction name="actionEnableInformation"/>
+  </widget>
+  <action name="actionSetWorkspace">
+   <property name="text">
+    <string>Set Workspace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionSaveRegistrator">
+   <property name="text">
+    <string>Save Registrator</string>
+   </property>
+  </action>
+  <action name="actionRegistrationICP">
+   <property name="text">
+    <string>ICP Registration</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionIncreasePointSize">
+   <property name="text">
+    <string>Increase Point Size</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+=</string>
+   </property>
+  </action>
+  <action name="actionDecreasePointSize">
+   <property name="text">
+    <string>Decrease Point Size</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionIncreaseLineWidth">
+   <property name="text">
+    <string>Increase Line Width</string>
+   </property>
+   <property name="shortcut">
+    <string>+</string>
+   </property>
+  </action>
+  <action name="actionDecreaseLineWidth">
+   <property name="text">
+    <string>Decrease Line Width</string>
+   </property>
+   <property name="shortcut">
+    <string>_</string>
+   </property>
+  </action>
+  <action name="actionRefineAxis">
+   <property name="text">
+    <string>Refine Axis</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionSaveRegisteredPoints">
+   <property name="text">
+    <string>Save Registered Points</string>
+   </property>
+  </action>
+  <action name="actionGeneratePoints">
+   <property name="text">
+    <string>Generate Points</string>
+   </property>
+  </action>
+  <action name="actionBatchRegistration">
+   <property name="text">
+    <string>Registration</string>
+   </property>
+  </action>
+  <action name="actionBatchRenameViews">
+   <property name="text">
+    <string>Rename Views</string>
+   </property>
+  </action>
+  <action name="actionRegistrationLUM">
+   <property name="text">
+    <string>LUM Registration</string>
+   </property>
+  </action>
+  <action name="actionRenderPlant">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Render Plant</string>
+   </property>
+  </action>
+  <action name="actionRenderPot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Render Pot</string>
+   </property>
+  </action>
+  <action name="actionRenderNoise">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Render Noise</string>
+   </property>
+  </action>
+  <action name="actionRenderTriangles">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Triangles</string>
+   </property>
+  </action>
+  <action name="actionRenderStemGraph">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Stem Graph</string>
+   </property>
+  </action>
+  <action name="actionRenderOrgans">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Organs</string>
+   </property>
+  </action>
+  <action name="actionPOVRaySnapshot">
+   <property name="text">
+    <string>POV-Ray Snapshot</string>
+   </property>
+  </action>
+  <action name="actionPOVRayAnimation">
+   <property name="text">
+    <string>POV-Ray Animation</string>
+   </property>
+  </action>
+  <action name="actionCancelTasks">
+   <property name="text">
+    <string>Cancel Tasks</string>
+   </property>
+  </action>
+  <action name="actionParameterMaster">
+   <property name="text">
+    <string>Parameter Master</string>
+   </property>
+  </action>
+  <action name="actionBatchExtractPoints">
+   <property name="text">
+    <string>Extract Points</string>
+   </property>
+  </action>
+  <action name="actionBatchRenameFrames">
+   <property name="text">
+    <string>Rename Frames</string>
+   </property>
+  </action>
+  <action name="actionBatchEstimateNormal">
+   <property name="text">
+    <string>Estimate Normal</string>
+   </property>
+  </action>
+  <action name="actionRenderNormals">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Normals</string>
+   </property>
+  </action>
+  <action name="actionBatchEstimateThickness">
+   <property name="text">
+    <string>Estimate Thickness</string>
+   </property>
+  </action>
+  <action name="actionBatchVirtualScan">
+   <property name="text">
+    <string>Virtual Scan</string>
+   </property>
+  </action>
+  <action name="actionLoadMeshModel">
+   <property name="text">
+    <string>Load Mesh Model</string>
+   </property>
+  </action>
+  <action name="actionPovRayFrames">
+   <property name="text">
+    <string>POV-Ray Frames</string>
+   </property>
+  </action>
+  <action name="actionRemoveBadFrames">
+   <property name="text">
+    <string>Remove Bad Frames</string>
+   </property>
+  </action>
+  <action name="actionExtractPlant">
+   <property name="text">
+    <string>Extract Plant</string>
+   </property>
+  </action>
+  <action name="actionSaveSceneAsObj">
+   <property name="text">
+    <string>Save Scene as .obj</string>
+   </property>
+  </action>
+  <action name="actionBatchEstimateOrientation">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Estimate Orientation</string>
+   </property>
+  </action>
+  <action name="actionSaveCamera">
+   <property name="text">
+    <string>Save Camera</string>
+   </property>
+  </action>
+  <action name="actionLoadCamera">
+   <property name="text">
+    <string>Load Camera</string>
+   </property>
+  </action>
+  <action name="actionExtractKeyFrames">
+   <property name="text">
+    <string>Extract Key Frames</string>
+   </property>
+  </action>
+  <action name="actionForceCenterScene">
+   <property name="text">
+    <string>Center Scene</string>
+   </property>
+  </action>
+  <action name="actionEnableInformation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Dispaly Information</string>
+   </property>
+  </action>
+  <action name="actionRenderLeaves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Render Leaves</string>
+   </property>
+  </action>
+  <action name="actionRenderStems">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Render Stems</string>
+   </property>
+  </action>
+  <action name="actionRotateCloud">
+   <property name="text">
+    <string>Rotate Cloud</string>
+   </property>
+  </action>
+  <action name="actionLoadParameters">
+   <property name="text">
+    <string>Load Parameters</string>
+   </property>
+  </action>
+  <action name="actionSaveParameters">
+   <property name="text">
+    <string>Save Parameters</string>
+   </property>
+  </action>
+  <action name="actionRenderOrientations">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Orientations</string>
+   </property>
+  </action>
+  <action name="actionForwardClassify">
+   <property name="text">
+    <string>Forward Classify</string>
+   </property>
+  </action>
+  <action name="actionBackwardClassify">
+   <property name="text">
+    <string>Backward Classify</string>
+   </property>
+  </action>
+  <action name="actionSkeletonSketcher">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Skeleton Sketcher</string>
+   </property>
+  </action>
+  <action name="actionFSmoothLeaves">
+   <property name="text">
+    <string>FSmooth Leaves</string>
+   </property>
+  </action>
+  <action name="actionBSmoothLeaves">
+   <property name="text">
+    <string>BSmooth Leaves</string>
+   </property>
+  </action>
+  <action name="actionFSmoothStems">
+   <property name="text">
+    <string>FSmooth Stems</string>
+   </property>
+  </action>
+  <action name="actionBSmoothStems">
+   <property name="text">
+    <string>BSmooth Stems</string>
+   </property>
+  </action>
+  <action name="actionDecomposeLeaves">
+   <property name="text">
+    <string>Decompose Leaves</string>
+   </property>
+  </action>
+  <action name="actionDecomposeStems">
+   <property name="text">
+    <string>Decompose Stems</string>
+   </property>
+  </action>
+  <action name="actionAbsoluteClassify">
+   <property name="text">
+    <string>Absolute Classify</string>
+   </property>
+  </action>
+  <action name="actionConvertPcdToPlainText">
+   <property name="text">
+    <string>Convert Pcd To Plain Text</string>
+   </property>
+  </action>
+  <action name="actionRemoveErrorPoints">
+   <property name="text">
+    <string>Remove Error Points</string>
+   </property>
+  </action>
+  <action name="actionStartCapture">
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionStopCapture">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionWaterPlant">
+   <property name="text">
+    <string>Water</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="main_window.qrc"/>
+ </resources>
+ <connections/>
+</ui>
