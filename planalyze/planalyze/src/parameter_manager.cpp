@@ -16,8 +16,8 @@ ParameterManager::ParameterManager(void)
   virtual_scan_noise_(new DoubleParameter("Virtual Scan Noise", "Virtual Scan Noise", 0.1, 0.00, 1, 0.01)),
   virtual_scan_distance_(new DoubleParameter("Virtual Scan Distance", "Virtual Scan Distance", 200, 10, 1000, 1.0)),
   virtual_scan_resolution_(new DoubleParameter("Virtual Scan Resolution", "Virtual Scan Resolution", 1, 0.01, 100, 0.01)),
-  registration_max_iterations_(new IntParameter("Max Iterations", "Max Iterations", 64, 1, 1024)),
-  registration_max_distance_(new DoubleParameter("Max Distance", "Max Distance", 4, 1, 128, 1.0)),
+  registration_max_iterations_(new IntParameter("Max Iterations", "Max Iterations", 1024, 1, 1024)),
+  registration_max_distance_(new DoubleParameter("Max Distance", "Max Distance", 16, 1, 128, 1.0)),
   rename_offset_(new IntParameter("Rename Offset", "Rename Offset", 0, -11, 11, 1)),
   rename_frame_offset_(new IntParameter("Rename Frame Offset", "Rename Frame Offset", 0, -10000, 10000, 1)),
   frame_offset_(new IntParameter("Frame Offset", "Frame Offset", 1, -10000, 10000, 1)),
@@ -45,7 +45,8 @@ ParameterManager::ParameterManager(void)
   curvature_quantize_(new DoubleParameter("Curvature Quantize", "Threshold Quantize", 0.0015, 0.00001, 0.1, 0.00001)),
   stem_thickness_(new DoubleParameter("Stem Thickness", "Stem Thickness", 2.0, 0.1, 16.0, 0.1)),
   triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 1.5, 1.0, 8.0, 0.1)),
-  radius_(new IntParameter("Radius", "Radius", 500, 500, 1000, 1))
+  radius_(new IntParameter("Radius", "Radius", 500, 500, 1000, 1)),
+  times_(new IntParameter("Times", "Times", 5, 1, 100))
 {
 }
 
@@ -343,18 +344,20 @@ bool ParameterManager::getRegistrationLUMParameters(int& segment_threshold, int&
   return true;
 }
 
-bool ParameterManager::getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame)
+bool ParameterManager::getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame, int& times)
 {
   ParameterDialog parameter_dialog("Registration Parameters", MainWindow::getInstance());
   parameter_dialog.addParameter(registration_max_iterations_);
   parameter_dialog.addParameter(registration_max_distance_);
   parameter_dialog.addParameter(current_frame_);
+  parameter_dialog.addParameter(times_);
   if (!parameter_dialog.exec() == QDialog::Accepted)
     return false;
 
   max_iterations = *registration_max_iterations_;
   max_distance = *registration_max_distance_;
   frame = *current_frame_;
+  times = *times_;
 
   return true;
 }

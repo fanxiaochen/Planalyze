@@ -568,11 +568,19 @@ void Registrator::registrationICP(int max_iterations, double max_distance, int f
   return;
 }
 
+void Registrator::registrationICP(int max_iterations, double max_distance, int frame, int times)
+{
+  for(size_t i = 0; i < times; i++)
+    registrationICP(max_iterations, max_distance, frame);
+  
+  return;
+}
+
 void Registrator::registrationICP(void)
 {
-  int max_iterations, frame;
+  int max_iterations, frame, times;
   double max_distance;
-  if (!ParameterManager::getInstance().getRegistrationICPParameters(max_iterations, max_distance, frame))
+  if (!ParameterManager::getInstance().getRegistrationICPParameters(max_iterations, max_distance, frame, times))
     return;
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
@@ -584,7 +592,7 @@ void Registrator::registrationICP(void)
   connect(watcher, SIGNAL(started()), messenger, SLOT(sendRunningMessage()));
   connect(watcher, SIGNAL(finished()), messenger, SLOT(sendFinishedMessage()));
 
-  watcher->setFuture(QtConcurrent::run(this, &Registrator::registrationICP, max_iterations, max_distance, frame));
+  watcher->setFuture(QtConcurrent::run(this, &Registrator::registrationICP, max_iterations, max_distance, frame, times));
 
   return;
 }

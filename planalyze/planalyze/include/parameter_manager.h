@@ -63,7 +63,7 @@ public:
   bool getRegistrationLUMParameters(int& segment_threshold, int& max_iterations, double& max_distance,
     int& start_frame, int& end_frame, bool with_frames=true);
   bool getRegistrationLUMParameters(int& segment_threshold, int& max_iterations, double& max_distance, int& frame);
-  bool getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame);
+  bool getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame, int& times);
 
   bool getRenameViewsParameters(int& rename_offset);
   bool getRenameViewsParameters(int& rename_offset,
@@ -107,6 +107,7 @@ private:
   IntParameter*                                       segment_threshold_;
   IntParameter*                                       registration_max_iterations_;
   DoubleParameter*                                    registration_max_distance_;
+  IntParameter*                                       times_;
 
   IntParameter*                                       rename_offset_;
   IntParameter*                                       rename_frame_offset_;
