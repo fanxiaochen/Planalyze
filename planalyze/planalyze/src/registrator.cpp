@@ -505,7 +505,7 @@ void Registrator::computeError(int frame)
   return;
 }
 
-void Registrator::registrationICP(int max_iterations, double max_distance, int frame)
+void Registrator::registrationICP(int max_iterations, double max_distance, int frame, bool isUsingPot)
 {
   FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
   std::vector<osg::ref_ptr<PointCloud> > point_clouds;
@@ -541,11 +541,17 @@ void Registrator::registrationICP(int max_iterations, double max_distance, int f
   // Set the euclidean distance difference epsilon (criterion 3)
   icp.setEuclideanFitnessEpsilon(64);
 
-  model->getPointCloud(frame, 0)->getTransformedPoints(*target);
+  if(isUsingPot)
+    model->getPointCloud(frame, 0)->getTransformedPoints(*target);
+  else
+    model->getPointCloud(frame, 0)->getTransformedPlantPoints(*target);
   for (size_t i = 0, i_end = point_clouds.size(); i < i_end; ++ i)
   {
-    point_clouds[i]->getTransformedPoints(*source);
-
+    if(isUsingPot)
+      point_clouds[i]->getTransformedPoints(*source);
+    else
+      point_clouds[i]->getTransformedPlantPoints(*source);
+    
     icp.setInputSource(source);
     icp.setInputTarget(target);
     PclPointCloud transformed_source;
@@ -568,10 +574,10 @@ void Registrator::registrationICP(int max_iterations, double max_distance, int f
   return;
 }
 
-void Registrator::registrationICP(int max_iterations, double max_distance, int frame, int times)
+void Registrator::registrationICP(int max_iterations, double max_distance, int frame, bool isUsingPot, int times)
 {
   for(size_t i = 0; i < times; i++)
-    registrationICP(max_iterations, max_distance, frame);
+    registrationICP(max_iterations, max_distance, frame, isUsingPot);
   
   return;
 }
@@ -580,7 +586,8 @@ void Registrator::registrationICP(void)
 {
   int max_iterations, frame, times;
   double max_distance;
-  if (!ParameterManager::getInstance().getRegistrationICPParameters(max_iterations, max_distance, frame, times))
+  bool is_using_pot;
+  if (!ParameterManager::getInstance().getRegistrationICPParameters(max_iterations, max_distance, frame, is_using_pot, times))
     return;
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
@@ -592,7 +599,7 @@ void Registrator::registrationICP(void)
   connect(watcher, SIGNAL(started()), messenger, SLOT(sendRunningMessage()));
   connect(watcher, SIGNAL(finished()), messenger, SLOT(sendFinishedMessage()));
 
-  watcher->setFuture(QtConcurrent::run(this, &Registrator::registrationICP, max_iterations, max_distance, frame, times));
+  watcher->setFuture(QtConcurrent::run(this, &Registrator::registrationICP, max_iterations, max_distance, frame, is_using_pot, times));
 
   return;
 }

@@ -46,7 +46,8 @@ ParameterManager::ParameterManager(void)
   stem_thickness_(new DoubleParameter("Stem Thickness", "Stem Thickness", 2.0, 0.1, 16.0, 0.1)),
   triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 1.5, 1.0, 8.0, 0.1)),
   radius_(new IntParameter("Radius", "Radius", 500, 500, 1000, 1)),
-  times_(new IntParameter("Times", "Times", 5, 1, 100))
+  times_(new IntParameter("Times", "Times", 5, 1, 100)),
+  is_using_pot_(new BoolParameter("Pot or Not", "Pot or Not", true))
 {
 }
 
@@ -344,13 +345,14 @@ bool ParameterManager::getRegistrationLUMParameters(int& segment_threshold, int&
   return true;
 }
 
-bool ParameterManager::getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame, int& times)
+bool ParameterManager::getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame, bool& is_using_pot, int& times)
 {
   ParameterDialog parameter_dialog("Registration Parameters", MainWindow::getInstance());
   parameter_dialog.addParameter(registration_max_iterations_);
   parameter_dialog.addParameter(registration_max_distance_);
   parameter_dialog.addParameter(current_frame_);
   parameter_dialog.addParameter(times_);
+  parameter_dialog.addParameter(is_using_pot_);
   if (!parameter_dialog.exec() == QDialog::Accepted)
     return false;
 
@@ -358,6 +360,7 @@ bool ParameterManager::getRegistrationICPParameters(int& max_iterations, double&
   max_distance = *registration_max_distance_;
   frame = *current_frame_;
   times = *times_;
+  is_using_pot = *is_using_pot_;
 
   return true;
 }
