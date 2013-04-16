@@ -53,13 +53,13 @@ set(moc_incs  include/main_window.h
               include/registrator.h
               include/parameter_dialog.h
               include/threaded_painter.h
-              include/log_viewer_widget.h
+              include/statistics_viewer_widget.h
               include/file_system_model.h
               include/osg_viewer_widget.h
               include/task_dispatcher.h
               include/progress_bar.h
               include/sketch_handler.h
-			  include/parameter_dialog.h
+              include/parameter_dialog.h
               include/pattern_projector.h
               include/plain_text_viewer.h
               include/image_grabber.h
@@ -126,7 +126,7 @@ set(srcs    src/main.cpp
             src/adapter_widget.cpp
             src/threaded_painter.cpp
             src/osg_viewer_widget.cpp
-            src/log_viewer_widget.cpp
+            src/statistics_viewer_widget.cpp
             src/file_viewer_widget.cpp
             src/toggle_handler.cpp
             src/resize_handler.cpp

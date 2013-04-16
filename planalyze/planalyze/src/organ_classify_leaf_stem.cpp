@@ -48,12 +48,12 @@ double PointCloud::getGlobalStemThickness(void)
 
 double PointCloud::getGlobalLeafFeature(void)
 {
-  return getGlobalLeafThickness();
+  return getGlobalLeafFlatness();
 }
 
 double PointCloud::getGlobalStemFeature(void)
 {
-  return getGlobalStemThickness();
+  return getGlobalStemFlatness();
 }
 
 double PointCloud::computePointLeafDistance(const PclRichPoint& point)
@@ -61,10 +61,10 @@ double PointCloud::computePointLeafDistance(const PclRichPoint& point)
   double power = 2.0;
   int cost_scale = 50;
 
-  double point_feature = point.thickness;
-  double leaf_feature = getGlobalLeafThickness();
-  double diff_to_leaf = std::max(leaf_feature-point_feature, 0.0);
-  int leaf_cost = (diff_to_leaf > 0.0)?(std::pow(diff_to_leaf, power)*cost_scale):(0);
+  double point_feature = transformCurvature(point.curvature);
+  double leaf_feature = getGlobalLeafFlatness();
+  double diff_to_leaf = std::max(point_feature-leaf_feature, 0.0);
+  int leaf_cost = std::pow(diff_to_leaf, power)*cost_scale;
   return leaf_cost;
 }
 
@@ -73,10 +73,10 @@ double PointCloud::computePointStemDistance(const PclRichPoint& point)
   double power = 2.0;
   int cost_scale = 50;
 
-  double point_feature = point.thickness;
-  double stem_feature = getGlobalStemThickness();
-  double diff_to_stem = std::max(point_feature-stem_feature, 0.0);
-  int stem_cost = (diff_to_stem > 0.0)?(std::pow(diff_to_stem, power)*cost_scale):(0);
+  double point_feature = transformCurvature(point.curvature);
+  double stem_feature = getGlobalStemFlatness();
+  double diff_to_stem = std::max(stem_feature-point_feature, 0.0);
+  int stem_cost = std::pow(diff_to_stem, power)*cost_scale;
   return stem_cost;
 }
 
@@ -85,10 +85,10 @@ double PointCloud::computePointLeafDistance(const PclRichPoint& point, const Org
   double power = 2.0;
   int cost_scale = 50;
 
-  double point_feature = point.thickness;
-  double leaf_feature = leaf.getThickness();
-  double diff_to_leaf = std::max(leaf_feature-point_feature, 0.0);
-  int leaf_cost = (diff_to_leaf > 0.0)?(std::pow(diff_to_leaf, power)*cost_scale):(0);
+  double point_feature = transformCurvature(point.curvature);
+  double leaf_feature = leaf.getFlatness();
+  double diff_to_leaf = std::max(point_feature-leaf_feature, 0.0);
+  int leaf_cost = std::pow(diff_to_leaf, power)*cost_scale;
   return leaf_cost;
 }
 
@@ -97,10 +97,10 @@ double PointCloud::computePointStemDistance(const PclRichPoint& point, const Org
   double power = 2.0;
   int cost_scale = 50;
 
-  double point_feature = point.thickness;
-  double stem_feature = stem.getThickness();
-  double diff_to_stem = std::max(point_feature-stem_feature, 0.0);
-  int stem_cost = (diff_to_stem > 0.0)?(std::pow(diff_to_stem, power)*cost_scale):(0);
+  double point_feature = transformCurvature(point.curvature);
+  double stem_feature = stem.getFlatness();
+  double diff_to_stem = std::max(stem_feature-point_feature, 0.0);
+  int stem_cost = std::pow(diff_to_stem, power)*cost_scale;
   return stem_cost;
 }
 
@@ -197,6 +197,19 @@ void PointCloud::classifyLeafStem(double smooth_cost, bool forward)
     at(i).label = (label == 0)?(PclRichPoint::LABEL_STEM):(PclRichPoint::LABEL_LEAF);
   }
 
+  std::vector<std::vector<size_t> > leaf_components = computeLeafComponents();
+  int leaf_component_size = ParameterManager::getInstance().getLeafComponentSize();
+  for (size_t i = 0, i_end = leaf_components.size(); i < i_end; ++ i)
+  {
+    if (leaf_components[i].size() < leaf_component_size)
+    {
+      for (size_t j = 0, j_end = leaf_components[i].size(); j < j_end; ++ j)
+      {
+        at(leaf_components[i][j]).label = PclRichPoint::LABEL_STEM;
+      }
+    }
+  }
+
   return;
 }
 
@@ -233,6 +246,19 @@ void PointCloud::absoluteClassify(double smooth_cost)
   {
     int label = gco->whatLabel(i);
     at(i).label = (label == 0)?(PclRichPoint::LABEL_STEM):(PclRichPoint::LABEL_LEAF);
+  }
+
+  std::vector<std::vector<size_t> > leaf_components = computeLeafComponents();
+  int leaf_component_size = ParameterManager::getInstance().getLeafComponentSize();
+  for (size_t i = 0, i_end = leaf_components.size(); i < i_end; ++ i)
+  {
+    if (leaf_components[i].size() < leaf_component_size)
+    {
+      for (size_t j = 0, j_end = leaf_components[i].size(); j < j_end; ++ j)
+      {
+        at(leaf_components[i][j]).label = PclRichPoint::LABEL_STEM;
+      }
+    }
   }
 
   return;

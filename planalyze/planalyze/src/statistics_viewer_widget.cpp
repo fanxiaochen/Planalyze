@@ -1,4 +1,4 @@
-#include "log_viewer_widget.h"
+#include "statistics_viewer_widget.h"
 
 StatisticsViewerWidget::StatisticsViewerWidget(QWidget * parent)
   : QPlainTextEdit(parent)

@@ -27,9 +27,9 @@
 #include "sketch_handler.h"
 #include "parameter_manager.h"
 #include "osg_viewer_widget.h"
-#include "log_viewer_widget.h"
 #include "file_system_model.h"
 #include "file_viewer_widget.h"
+#include "statistics_viewer_widget.h"
 
 #include "main_window.h"
 
