@@ -37,7 +37,8 @@ public:
   void saveRegisteredPoints(int frame);
   void refineAxis(int frame);
   void registrationLUM(int segment_threshold, int max_iterations, double max_distance, int frame);
-  void registrationICP(int max_iterations, double max_distance, int frame);
+  void registrationICP(int max_iterations, double max_distance, int frame, bool isUsingPot, int times);
+  void registrationICP(int max_iterations, double max_distance, int frame, bool isUsingPot);
 
 public slots:
   void save(void);

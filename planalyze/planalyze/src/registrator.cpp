@@ -213,19 +213,23 @@ void Registrator::visualizeAxis()
   osg::Vec3 normal_point = normal_point_->getMatrix().getTrans();
   osg::Vec3 normal = normal_point-pivot_point;
   normal.normalize();
-
+                                                
   osg::ref_ptr<osg::LineSegment> cone(new osg::LineSegment(normal_point-normal*cone_length, normal_point));
   visualization_->addChild(OSGUtility::drawCone(*cone, cone_thickness, osg::Vec4(0.6, 0.6, 0.6, 1.0)));
 
   double disc_radius = std::sqrt(radius*radius-(pivot_point-boundingSphere.center()).length2())/3;
   osg::ref_ptr<osg::LineSegment> disc(new osg::LineSegment(pivot_point-normal*0.01, pivot_point+normal*0.01));
   visualization_->addChild(OSGUtility::drawCylinder(*disc, disc_radius, osg::Vec4(0.79, 1.0, 0.44, 0.8)));
+  
+
+  osg::Vec3 axis_y = pivot_dragger_->getMatrix()*osg::Vec3(0,1,0);
+  osg::Matrix rotation(osg::Matrix::rotate(axis_y,-normal));
 
   float t_scale = radius/4;
   float r_scale = radius/6;
-  osg::Matrix flip(osg::Matrix::rotate(osg::Vec3(0, 1, 0), osg::Vec3(0, -1, 0)));
-  pivot_dragger_->setMatrix(flip*osg::Matrix::scale(t_scale, t_scale, t_scale)*osg::Matrix::translate(pivot_point));
-  normal_dragger_->setMatrix(osg::Matrix::scale(r_scale, r_scale, r_scale)*osg::Matrix::translate(pivot_point));
+  osg::Matrix flip(osg::Matrix::rotate(osg::Vec3(0, 1, 0), osg::Vec3(0, -1, 0)));        
+  pivot_dragger_->setMatrix(flip*osg::Matrix::scale(t_scale, t_scale, t_scale)*rotation*osg::Matrix::translate(pivot_point));
+  normal_dragger_->setMatrix(osg::Matrix::scale(r_scale, r_scale, r_scale)*rotation*osg::Matrix::translate(pivot_point));
 
   osg::ref_ptr<osg::LineSegment> cylinder_0(new osg::LineSegment(normal_point-normal*diameter, pivot_point));
   visualization_->addChild(OSGUtility::drawCylinder(*cylinder_0, cylinder_thickness, osg::Vec4(0.6, 0.6, 0.6, 1.0)));
@@ -501,7 +505,7 @@ void Registrator::computeError(int frame)
   return;
 }
 
-void Registrator::registrationICP(int max_iterations, double max_distance, int frame)
+void Registrator::registrationICP(int max_iterations, double max_distance, int frame, bool isUsingPot)
 {
   FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
   std::vector<osg::ref_ptr<PointCloud> > point_clouds;
@@ -537,11 +541,17 @@ void Registrator::registrationICP(int max_iterations, double max_distance, int f
   // Set the euclidean distance difference epsilon (criterion 3)
   icp.setEuclideanFitnessEpsilon(64);
 
-  model->getPointCloud(frame, 0)->getTransformedPlantPoints(*target);
+  if(isUsingPot)
+    model->getPointCloud(frame, 0)->getTransformedPoints(*target);
+  else
+    model->getPointCloud(frame, 0)->getTransformedPlantPoints(*target);
   for (size_t i = 0, i_end = point_clouds.size(); i < i_end; ++ i)
   {
-    point_clouds[i]->getTransformedPlantPoints(*source);
-
+    if(isUsingPot)
+      point_clouds[i]->getTransformedPoints(*source);
+    else
+      point_clouds[i]->getTransformedPlantPoints(*source);
+    
     icp.setInputSource(source);
     icp.setInputTarget(target);
     PclPointCloud transformed_source;
@@ -564,11 +574,20 @@ void Registrator::registrationICP(int max_iterations, double max_distance, int f
   return;
 }
 
+void Registrator::registrationICP(int max_iterations, double max_distance, int frame, bool isUsingPot, int times)
+{
+  for(size_t i = 0; i < times; i++)
+    registrationICP(max_iterations, max_distance, frame, isUsingPot);
+  
+  return;
+}
+
 void Registrator::registrationICP(void)
 {
-  int max_iterations, frame;
+  int max_iterations, frame, times;
   double max_distance;
-  if (!ParameterManager::getInstance().getRegistrationICPParameters(max_iterations, max_distance, frame))
+  bool is_using_pot;
+  if (!ParameterManager::getInstance().getRegistrationICPParameters(max_iterations, max_distance, frame, is_using_pot, times))
     return;
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
@@ -580,7 +599,7 @@ void Registrator::registrationICP(void)
   connect(watcher, SIGNAL(started()), messenger, SLOT(sendRunningMessage()));
   connect(watcher, SIGNAL(finished()), messenger, SLOT(sendFinishedMessage()));
 
-  watcher->setFuture(QtConcurrent::run(this, &Registrator::registrationICP, max_iterations, max_distance, frame));
+  watcher->setFuture(QtConcurrent::run(this, &Registrator::registrationICP, max_iterations, max_distance, frame, is_using_pot, times));
 
   return;
 }

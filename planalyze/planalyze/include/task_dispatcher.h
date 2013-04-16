@@ -110,6 +110,29 @@ private:
   int             angle_;
 };
 
+class TaskConvertPcd : public TaskImpl
+{
+public:
+  TaskConvertPcd(int frame);
+  virtual ~TaskConvertPcd();
+
+  virtual void run(void) const;
+
+};
+
+class TaskRemoveErrorPoints : public TaskImpl
+{
+public:
+  TaskRemoveErrorPoints(int frame, int radius);
+  virtual ~TaskRemoveErrorPoints();
+
+  virtual void run(void) const;
+
+private:
+  int radius_;
+
+};
+
 class TaskRenameFrames : public TaskImpl
 {
 public:
@@ -258,6 +281,8 @@ public slots:
   void dispathcTaskExtractPlant(void);
   void dispathcTaskExtractKeyFrames(void);
   void dispathcTaskRotateCloud(void);
+  void dispathcTaskConvertPcd(void);
+  void dispathcTaskRemoveErrorPoints(void);
   void updateDisplayQueue(int frame, int view);
   void clearDisplayQueue(void);
   void removeFinishedWatchers(void);
@@ -283,6 +308,8 @@ private:
   QList<Task>                         extract_plant_tasks_;
   QList<Task>                         extract_key_frames_;
   QList<Task>                         rotate_cloud_tasks_;
+  QList<Task>                         convert_pcd_tasks_;
+  QList<Task>                         remove_error_points_tasks_;
 
   std::vector<QObject*>               active_watchers_;
   typedef std::list<std::pair<int, int> > DisplayQueue;

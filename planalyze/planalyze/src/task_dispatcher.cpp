@@ -1,4 +1,4 @@
-﻿#include <fstream>
+﻿#include <osgDB/fstream>
 #include <QProcess>
 #include <QMessageBox>
 #include <QMutexLocker>
@@ -13,7 +13,7 @@
 #include "point_cloud.h"
 #include "registrator.h"
 #include "parameter_manager.h"
-#include "file_system_model.h"
+#include "file_system_model.h"             
 #include "povray_visitor.h"
 #include "osg_viewer_widget.h"
 
@@ -218,6 +218,71 @@ void TaskRotateCloud::run(void) const
   return;
 }
 
+TaskConvertPcd::TaskConvertPcd(int frame)
+  :TaskImpl(frame, -1)
+{}
+
+TaskConvertPcd::~TaskConvertPcd(void)
+{}
+
+void TaskConvertPcd::run(void) const
+{
+  FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
+  osg::ref_ptr<PointCloud> points = model->getPointCloud(frame_);
+
+  QString filename = model->rootPath()+"/"+QString("frame_%1.txt").arg(frame_, 5, 10, QChar('0'));
+  std::ofstream fout(filename.toStdString(), std::ios::out);
+
+  if (!fout.good())
+    return;
+
+  for(size_t i = 0, i_end = points->size(); i < i_end; i ++)
+  {
+    PclRichPoint& point = points->at(i);
+    fout<<point.x<<" "<<point.y<<" "<<point.z<<" ";
+    fout<<(int)point.r<<" "<<(int)point.g<<" "<<(int)point.b<<"\n"; 
+  }
+
+
+  fout.close();
+
+  return;
+}
+
+TaskRemoveErrorPoints::TaskRemoveErrorPoints(int frame, int radius)
+  :TaskImpl(frame, -1), radius_(radius)
+{}
+
+TaskRemoveErrorPoints::~TaskRemoveErrorPoints(void)
+{}
+
+void TaskRemoveErrorPoints::run(void) const
+{
+  
+  FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
+  osg::ref_ptr<PointCloud> point_cloud = model->getPointCloud(0);
+  point_cloud->update();
+  osg::Vec3 center = point_cloud->getBound().center();
+  double radius = point_cloud->getBound().radius();
+
+  point_cloud = model->getPointCloud(frame_);
+  point_cloud->update();
+
+  PointCloud new_cloud;
+  for(size_t i = 0, i_end = point_cloud->size(); i < i_end; i++)
+  {
+    PclRichPoint point = point_cloud->at(i);
+    double distance = std::sqrt((point.x-center.x())*(point.x-center.x())+(point.y-center.y())*(point.y-center.y())+
+      (point.z-center.z())*(point.z-center.z()));
+    if(distance <= radius)
+      new_cloud.push_back(point);
+  }
+  new_cloud.save(model->getPointsFilename(frame_));
+
+  return;
+
+}
+
 TaskExtractKeyFrames::TaskExtractKeyFrames(int frame, int offset, int start_frame, bool is_point, QString root_folder)
   :TaskImpl(frame, -1), offset_(offset), start_frame_(start_frame), is_point_(is_point), root_folder_(root_folder) 
 {}
@@ -307,25 +372,12 @@ void TaskRenameFrames::run(void) const
 
 
   int new_frame_number = frame_ + rename_offset_;
-  QString new_frame_folder = QString("frame_%1").arg(rename_offset_ - frame_, 5, 10, QChar('0'));
+  QString new_frame_folder = QString("frame_%1").arg(new_frame_number, 5, 10, QChar('0'));
 
   images_dir.rename(frame_folder, new_frame_folder);
   points_dir.rename(frame_folder, new_frame_folder);
 
   return;
-
-  /*FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
-  QDir points_dir(model->rootPath()+"/points");
-  QDir frame_folder = QString("frame_%1").arg(frame_, 5, 10, QChar('0'));
-  std::cout<<frame_folder.absolutePath().toStdString()<<std::endl;
-  for(size_t i = 0; i < 12; i ++)
-  {
-  QString view = QString("view_%1").arg(i, 2, 10, QChar('0'));
-  QString view_renamed = QString("frame_%1").arg(i, 5, 10, QChar('0'));
-  frame_folder.rename(view, view_renamed);
-  }
-
-  return;*/
 
 }
 
@@ -338,69 +390,39 @@ TaskRenameViews::~TaskRenameViews(void)
 
 void TaskRenameViews::run(void) const
 {
-  /*FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
+  FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
 
   QDir points_dir(model->getPointsFolder(frame_).c_str());
   QDir images_dir(model->getImagesFolder(frame_).c_str());
 
   for (size_t view = 0; view < 12; ++ view)
   {
-  QString view_folder = QString("slice_%1").arg(view, 2, 10, QChar('0'));
-  if (!points_dir.exists(view_folder))
-  view_folder = QString("view_%1").arg(view, 2, 10, QChar('0'));
+    QString view_folder = QString("slice_%1").arg(view, 2, 10, QChar('0'));
+    if (!points_dir.exists(view_folder))
+      view_folder = QString("view_%1").arg(view, 2, 10, QChar('0'));
 
-  points_dir.rename(view_folder, view_folder+"_tmp");
-  images_dir.rename(view_folder, view_folder+"_tmp");
+    points_dir.rename(view_folder, view_folder+"_tmp");
+    images_dir.rename(view_folder, view_folder+"_tmp");
   }
 
   for (int view = 0; view < 12; ++ view)
   {
-  QString view_folder = QString("slice_%1_tmp").arg(view, 2, 10, QChar('0'));
-  if (!points_dir.exists(view_folder))
-  view_folder = QString("view_%1_tmp").arg(view, 2, 10, QChar('0'));
+    QString view_folder = QString("slice_%1_tmp").arg(view, 2, 10, QChar('0'));
+    if (!points_dir.exists(view_folder))
+      view_folder = QString("view_%1_tmp").arg(view, 2, 10, QChar('0'));
 
-  int new_view_number = view + rename_offset_;
-  if (new_view_number < 0)
-  new_view_number = 12+new_view_number;
-  if (new_view_number > 11)
-  new_view_number = new_view_number-12;
-  QString new_view_folder = QString("view_%1").arg(new_view_number, 2, 10, QChar('0'));
+    int new_view_number = view + rename_offset_;
+    if (new_view_number < 0)
+      new_view_number = 12+new_view_number;
+    if (new_view_number > 11)
+      new_view_number = new_view_number-12;
+    QString new_view_folder = QString("view_%1").arg(new_view_number, 2, 10, QChar('0'));
 
-  points_dir.rename(view_folder, new_view_folder);
-  images_dir.rename(view_folder, new_view_folder);
-  }*/
-
-  FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
-  osg::ref_ptr<PointCloud> point_cloud = model->getPointCloud(0);
-  point_cloud->update();
-  osg::Vec3 center = point_cloud->getBound().center();
-  double radius = point_cloud->getBound().radius();
-
-  point_cloud = model->getPointCloud(frame_);
-  point_cloud->update();
-
-  PointCloud new_cloud;
-  for(size_t i = 0, i_end = point_cloud->size(); i < i_end; i++)
-  {
-    PclRichPoint point = point_cloud->at(i);
-    double distance = std::sqrt((point.x-center.x())*(point.x-center.x())+(point.y-center.y())*(point.y-center.y())+
-      (point.z-center.z())*(point.z-center.z()));
-    if(distance <= radius)
-      new_cloud.push_back(point);
+    points_dir.rename(view_folder, new_view_folder);
+    images_dir.rename(view_folder, new_view_folder);
   }
-  new_cloud.save(model->getPointsFilename(frame_));
 
   return;
-
-  /*FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
-  QString frame_dir(model->getPointsFolder(frame_).c_str());
-  QString view = QString("view_%1").arg(11, 2, 10, QChar('0'));
-  QString original_image = frame_dir+"/"+view+"/snapshot.jpg";
-
-  QString extracted_dir(model->rootPath()+"/snapshots");
-  QString extracted_image = QString(extracted_dir+"/%1.jpg").arg(frame_, 2, 10, QChar('0'));
-
-  QFile::copy(original_image, extracted_image);*/
   
 }
 
@@ -902,9 +924,6 @@ void TaskDispatcher::dispatchTaskRenameViews(void)
 
   FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
 
-  QDir images_dir(model->rootPath());
-  images_dir.mkdir("snapshots");
-
 
   for (int frame = start_frame; frame <= end_frame; frame ++)
     rename_views_tasks_.push_back(Task(new TaskRenameViews(frame, rename_offset)));
@@ -1009,13 +1028,6 @@ void TaskDispatcher::dispathcTaskExtractKeyFrames(void)
     .getExtractKeyFramesParameters(frame_offset ,start_frame, end_frame , is_point))
     return;
 
-  /*FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
-  QDir root(model->rootPath());
-  root.mkdir("KeyFrames");
-  root.mkdir("KeyFrames/points");
-  if(!is_point)
-    root.mkdir("KeyFrames/images");*/
-
   MainWindow* main_window = MainWindow::getInstance();
   QDir workspaceUp(main_window->getWorkspace());
   workspaceUp.cdUp();
@@ -1059,6 +1071,53 @@ void TaskDispatcher::dispathcTaskRotateCloud(void)
   return;
 }
 
+void TaskDispatcher::dispathcTaskConvertPcd(void)
+{
+  if (!convert_pcd_tasks_.isEmpty())
+  {
+    QMessageBox::warning(MainWindow::getInstance(), "Convert Task Warning",
+      "Run convert task after the previous one has finished");
+    return;
+  }
+
+  int start_frame, end_frame;
+  if (!ParameterManager::getInstance()
+    .getConvertPcdParameters(start_frame, end_frame))
+    return;
+
+
+  for (int frame = start_frame; frame <= end_frame; frame ++)
+    convert_pcd_tasks_.push_back(Task(new TaskConvertPcd(frame)));
+
+  runTasks(convert_pcd_tasks_, "Convert Pcd", false);
+
+  return;
+}
+
+void TaskDispatcher::dispathcTaskRemoveErrorPoints(void)
+{
+  if (!convert_pcd_tasks_.isEmpty())
+  {
+    QMessageBox::warning(MainWindow::getInstance(), "Remove Task Warning",
+      "Run remove task after the previous one has finished");
+    return;
+  }
+
+  int start_frame, end_frame;
+  int radius;
+  if (!ParameterManager::getInstance()
+    .getRemoveErrorPointsParameters(start_frame, end_frame, radius))
+    return;
+
+
+  for (int frame = start_frame; frame <= end_frame; frame ++)
+    remove_error_points_tasks_.push_back(Task(new TaskConvertPcd(frame)));
+
+  runTasks(remove_error_points_tasks_, "Remove Error Points", false);
+
+  return;
+}
+
 void TaskDispatcher::dispathcTaskGeneratePovrayData(void)
 {
   if (!generate_povray_data_tasks_.isEmpty())
@@ -1072,11 +1131,6 @@ void TaskDispatcher::dispathcTaskGeneratePovrayData(void)
     .getPovrayDataParameters(start_frame_, end_frame_, frame_delta_, frame_multiple_, camera_number_, stop_delta_, camera_delta_))
     return;
 
-  /*FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
-  QDir root(model->rootPath());
-  root.mkdir("POV-Ray");
-  root.mkdir("POV-Ray/data");
-  root.mkdir("POV-Ray/texture");*/
 
   MainWindow* main_window = MainWindow::getInstance();
   QDir workspaceUp(main_window->getWorkspace());

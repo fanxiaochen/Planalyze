@@ -422,7 +422,7 @@ void OSGViewerWidget::loadCameraParameters(void)
 
   camera_manipulator->setHomePosition(eye, center, up);
   camera_manipulator->home(0);
-
+                             
   camera_manipulator->setHomePosition(e, c, u);
 
   return;

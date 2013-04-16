@@ -102,7 +102,7 @@ private:
   FileViewerWidget*               file_viewer_widget_;
   StatisticsViewerWidget*                statistics_viewer_widget_;
   TaskDispatcher*                 task_dispatcher_;
-    SkeletonSketcher*               skeleton_sketcher_;
+  SkeletonSketcher*               skeleton_sketcher_;
 
   QString                         workspace_;
 

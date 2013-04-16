@@ -63,7 +63,7 @@ public:
   bool getRegistrationLUMParameters(int& segment_threshold, int& max_iterations, double& max_distance,
     int& start_frame, int& end_frame, bool with_frames=true);
   bool getRegistrationLUMParameters(int& segment_threshold, int& max_iterations, double& max_distance, int& frame);
-  bool getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame);
+  bool getRegistrationICPParameters(int& max_iterations, double& max_distance, int& frame, bool& is_using_pot, int& times);
 
   bool getRenameViewsParameters(int& rename_offset);
   bool getRenameViewsParameters(int& rename_offset,
@@ -84,6 +84,10 @@ public:
 
   bool getRotateCloudParameters(int& angle, int& start_frame, int& end_frame, bool with_frames = true);
 
+  bool getConvertPcdParameters(int& start_frame, int& end_frame, bool with_frames = true);
+
+  bool getRemoveErrorPointsParameters(int& start_frame, int& end_frame, int& radius, bool with_frames = true);
+
   bool getAllParameters(void);
 
 protected:
@@ -103,6 +107,8 @@ private:
   IntParameter*                                       segment_threshold_;
   IntParameter*                                       registration_max_iterations_;
   DoubleParameter*                                    registration_max_distance_;
+  IntParameter*                                       times_;
+  BoolParameter*                                      is_using_pot_;
 
   IntParameter*                                       rename_offset_;
   IntParameter*                                       rename_frame_offset_;
@@ -117,6 +123,8 @@ private:
   IntParameter*                                       stop_delta_;
   IntParameter*                                       camera_delta_;
   IntParameter*                                       frame_multiple_;
+
+  IntParameter*                                       radius_;
 
   IntParameter*                                       angle_;
 

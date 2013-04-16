@@ -279,6 +279,8 @@ void MainWindow::init(void)
   connect(ui_.actionExtractPlant, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskExtractPlant()));
   connect(ui_.actionExtractKeyFrames, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskExtractKeyFrames()));
   connect(ui_.actionRotateCloud, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskRotateCloud()));
+  connect(ui_.actionConvertPcdToPlainText, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskConvertPcd()));
+  connect(ui_.actionRemoveErrorPoints, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskRemoveErrorPoints()));
 
   connect(ui_.actionSkeletonSketcher, SIGNAL(toggled(bool)), skeleton_sketcher_, SLOT(toggle(bool)));
 

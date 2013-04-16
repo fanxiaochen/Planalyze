@@ -500,7 +500,6 @@ void FileSystemModel::showPointCloud(const QPersistentModelIndex& index)
   point_cloud_map_[index] = point_cloud;
 
   showPointCloudSceneInformation();
-
   return;
 }
 
