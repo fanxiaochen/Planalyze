@@ -15,7 +15,7 @@ class Registrator;
 class Information;
 class AxisIndicator;
 class TaskDispatcher;
-class LogViewerWidget;
+class StatisticsViewerWidget;
 class FileSystemModel;
 class OSGViewerWidget;
 class FileViewerWidget;
@@ -100,7 +100,7 @@ private:
   AxisIndicator*                  axis_indicator_;
   OSGViewerWidget*                osg_viewer_widget_;
   FileViewerWidget*               file_viewer_widget_;
-  LogViewerWidget*                log_viewer_widget_;
+  StatisticsViewerWidget*                statistics_viewer_widget_;
   TaskDispatcher*                 task_dispatcher_;
     SkeletonSketcher*               skeleton_sketcher_;
 

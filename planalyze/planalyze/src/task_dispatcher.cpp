@@ -415,7 +415,7 @@ TaskRemoveBadFrames::~TaskRemoveBadFrames(void)
 {
 
 }
-                                              
+
 void TaskRemoveBadFrames::run() const
 {
   /*FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();

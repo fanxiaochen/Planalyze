@@ -1,12 +1,12 @@
 #include "log_viewer_widget.h"
 
-LogViewerWidget::LogViewerWidget(QWidget * parent)
+StatisticsViewerWidget::StatisticsViewerWidget(QWidget * parent)
   : QPlainTextEdit(parent)
 {
   setReadOnly(true);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
-LogViewerWidget::~LogViewerWidget(void)
+StatisticsViewerWidget::~StatisticsViewerWidget(void)
 {
 }

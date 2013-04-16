@@ -38,7 +38,7 @@ MainWindow::MainWindow(void)
   axis_indicator_(new AxisIndicator),
   osg_viewer_widget_(NULL),
   file_viewer_widget_(NULL),
-  log_viewer_widget_(NULL),
+  statistics_viewer_widget_(NULL),
     skeleton_sketcher_(NULL),
   information_(NULL),
   task_dispatcher_(new TaskDispatcher(this)),
@@ -178,7 +178,7 @@ void MainWindow::init(void)
 {
   osg_viewer_widget_ = new OSGViewerWidget(this);
   file_viewer_widget_ = new FileViewerWidget(this);
-  log_viewer_widget_ = new LogViewerWidget(this);
+  statistics_viewer_widget_ = new StatisticsViewerWidget(this);
   information_ = new Information();
 
   osg_viewer_widget_->addEventHandler(new ToggleHandler(registrator_, 'r', "Toggle Registrator."));
@@ -205,12 +205,12 @@ void MainWindow::init(void)
   file_viewer_widget_->setParent(dock_widget_status_file);
   dock_widget_status_file->setWidget(file_viewer_widget_);
 
-  QDockWidget* dock_widget_status_log = new QDockWidget("Status Log", this);
-  addDockWidget(Qt::LeftDockWidgetArea, dock_widget_status_log);
-  dock_widget_status_log->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-  ui_.menuView->addAction(dock_widget_status_log->toggleViewAction());
-  log_viewer_widget_->setParent(dock_widget_status_log);
-  dock_widget_status_log->setWidget(log_viewer_widget_);
+  QDockWidget* dock_widget_statistics = new QDockWidget("Statistics", this);
+  addDockWidget(Qt::BottomDockWidgetArea, dock_widget_statistics);
+  dock_widget_statistics->setAllowedAreas(Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea);
+  ui_.menuView->addAction(dock_widget_statistics->toggleViewAction());
+  statistics_viewer_widget_->setParent(dock_widget_statistics);
+  dock_widget_statistics->setWidget(statistics_viewer_widget_);
 
   connect(this, SIGNAL(timeToUpdateStatusMessage(QString)), statusBar(), SLOT(showMessage(QString)));
 
