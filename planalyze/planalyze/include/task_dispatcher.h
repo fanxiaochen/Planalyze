@@ -133,6 +133,20 @@ private:
 
 };
 
+class TaskReverseFrames : public TaskImpl
+{
+public:
+  TaskReverseFrames(int frame, int start_frame, int end_frame);
+  virtual ~TaskReverseFrames();
+
+  virtual void run(void) const;
+  
+private:
+  int start_frame_;
+  int end_frame_;
+
+};
+
 class TaskRenameFrames : public TaskImpl
 {
 public:
@@ -283,6 +297,7 @@ public slots:
   void dispathcTaskRotateCloud(void);
   void dispathcTaskConvertPcd(void);
   void dispathcTaskRemoveErrorPoints(void);
+  void dispathcTaskReverseFrames(void);
   void updateDisplayQueue(int frame, int view);
   void clearDisplayQueue(void);
   void removeFinishedWatchers(void);
@@ -310,6 +325,7 @@ private:
   QList<Task>                         rotate_cloud_tasks_;
   QList<Task>                         convert_pcd_tasks_;
   QList<Task>                         remove_error_points_tasks_;
+  QList<Task>                         reverse_frames_tasks_;
 
   std::vector<QObject*>               active_watchers_;
   typedef std::list<std::pair<int, int> > DisplayQueue;

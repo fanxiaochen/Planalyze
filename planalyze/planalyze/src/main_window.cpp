@@ -281,7 +281,7 @@ void MainWindow::init(void)
   connect(ui_.actionRotateCloud, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskRotateCloud()));
   connect(ui_.actionConvertPcdToPlainText, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskConvertPcd()));
   connect(ui_.actionRemoveErrorPoints, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskRemoveErrorPoints()));
-
+  connect(ui_.actionReverseFrames, SIGNAL(triggered()), task_dispatcher_, SLOT(dispathcTaskReverseFrames()));
   connect(ui_.actionSkeletonSketcher, SIGNAL(toggled(bool)), skeleton_sketcher_, SLOT(toggle(bool)));
 
 

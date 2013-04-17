@@ -497,6 +497,18 @@ bool ParameterManager::getRemoveErrorPointsParameters(int& start_frame, int& end
   return true;
 }
 
+bool ParameterManager::getReverseFramesParameters(int& start_frame, int& end_frame, bool with_frames)
+{
+  ParameterDialog parameter_dialog("Reverse Frames Parameters", MainWindow::getInstance());
+  addFrameParameters(&parameter_dialog, with_frames);
+  if(!parameter_dialog.exec() == QDialog::Accepted)
+    return false;
+
+  getFrameparametersImpl(start_frame, end_frame, with_frames);
+
+  return true;
+}
+
 bool ParameterManager::getExtractPlantParameters(int& start_frame, int& end_frame , int& delta, bool with_frames)
 {
   ParameterDialog parameter_dialog("Get Extract Plant Parameters", MainWindow::getInstance());

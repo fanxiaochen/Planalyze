@@ -109,6 +109,7 @@
     <addaction name="separator"/>
     <addaction name="actionBatchRenameViews"/>
     <addaction name="actionBatchRenameFrames"/>
+    <addaction name="actionReverseFrames"/>
     <addaction name="separator"/>
     <addaction name="actionExtractPlant"/>
     <addaction name="actionBatchExtractPoints"/>
@@ -583,6 +584,11 @@
   <action name="actionWaterPlant">
    <property name="text">
     <string>Water</string>
+   </property>
+  </action>
+  <action name="actionReverseFrames">
+   <property name="text">
+    <string>Reverse Frames</string>
    </property>
   </action>
  </widget>
