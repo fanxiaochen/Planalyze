@@ -1,12 +1,15 @@
+#include "statistics.h"
+
 #include "statistics_viewer_widget.h"
 
 StatisticsViewerWidget::StatisticsViewerWidget(QWidget * parent)
-  : QPlainTextEdit(parent)
+  : QwtPlot(parent),
+  statistics_(new Statistics(this))
 {
-  setReadOnly(true);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
 StatisticsViewerWidget::~StatisticsViewerWidget(void)
 {
+  delete statistics_;
 }

@@ -38,6 +38,8 @@ public:
   bool save(const std::string& filename);
   void reload(void);
 
+  void updateStatistics(void);
+
   virtual void povray(SlavePovRayVisitor* povray_visitor) const;
   virtual void povrayOrgan(SlavePovRayVisitor* povray_visitor) const;
   void savePovrayData(void);

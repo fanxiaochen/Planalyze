@@ -45,6 +45,7 @@ public:
 
   OSGViewerWidget* getOSGViewerWidget(void) {return osg_viewer_widget_;}
   FileViewerWidget* getFileViewerWidget(void) {return file_viewer_widget_;}
+  StatisticsViewerWidget* getStatisticsViewerWidget(void) {return statistics_viewer_widget_;}
   FileSystemModel* getFileSystemModel(void);
   Registrator* getRegistrator(void) {return registrator_;}
   Information* getInformation(void) {return information_;}
@@ -100,7 +101,7 @@ private:
   AxisIndicator*                  axis_indicator_;
   OSGViewerWidget*                osg_viewer_widget_;
   FileViewerWidget*               file_viewer_widget_;
-  StatisticsViewerWidget*                statistics_viewer_widget_;
+  StatisticsViewerWidget*         statistics_viewer_widget_;
   TaskDispatcher*                 task_dispatcher_;
   SkeletonSketcher*               skeleton_sketcher_;
 

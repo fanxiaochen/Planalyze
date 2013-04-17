@@ -5,6 +5,10 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(3rdParty)
+
+find_package(Qwt REQUIRED)
+include_directories(${QWT_INCLUDE_DIR})
+
 find_package(Qextserialport REQUIRED)
 include_directories(${QEXTSERIALPORT_INCLUDE_DIR})
 
@@ -97,8 +101,8 @@ set(incs    ${moc_incs}
             include/math_solvers.h
             include/information.h
             include/mesh_model.h
-			include/image_viewer.h
-
+            include/image_viewer.h
+            include/statistics.h
             )
 
 set(3rd_incs  3rd-party/gco/block.h
@@ -148,11 +152,13 @@ set(srcs    src/main.cpp
             src/mesh_model.cpp
             src/progress_bar.cpp
             src/sketch_handler.cpp
-			src/turn_table.cpp
-			src/pattern_projector.cpp
-			src/image_grabber.cpp
-			src/image_viewer.cpp
-			src/plain_text_viewer.cpp
+            src/turn_table.cpp
+            src/pattern_projector.cpp
+            src/image_grabber.cpp
+            src/image_viewer.cpp
+            src/plain_text_viewer.cpp
+            src/statistics.cpp
+            src/point_cloud_statistics.cpp
             )
 
 set(3rd_srcs  3rd-party/gco/GCoptimization.cpp
@@ -181,7 +187,7 @@ ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
 set(exe_name planalyze)
 add_executable(${exe_name} ${ui_srcs} ${moc_srcs} ${resource_srcs} ${srcs} ${3rd_srcs} ${incs} ${3rd_incs} ${impl_incs})
-target_link_libraries(${exe_name} pcl_wrapper ${OPENGL_LIBRARIES} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${QT_QTOPENGL_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTXML_LIBRARY} ${QT_QTCORE_LIBRARY} ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${ThirdParty_LIBS} ${QEXTSERIALPORT_LIBRARY})
+target_link_libraries(${exe_name} pcl_wrapper ${OPENGL_LIBRARIES} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${QT_QTOPENGL_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTXML_LIBRARY} ${QT_QTCORE_LIBRARY} ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${ThirdParty_LIBS} ${QEXTSERIALPORT_LIBRARY} ${QWT_LIBRARY})
 
 if(WIN32 AND MSVC)
   set_target_properties(${exe_name} PROPERTIES LINK_FLAGS_RELEASE /OPT:REF)

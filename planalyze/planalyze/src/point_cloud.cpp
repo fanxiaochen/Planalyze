@@ -157,6 +157,7 @@ bool PointCloud::open(const std::string& filename)
   loadStatus();
   locker.relock();
   fillOrganPoints();
+  updateStatistics();
 
   expire();
 
