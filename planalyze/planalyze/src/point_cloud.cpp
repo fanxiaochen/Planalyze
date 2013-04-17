@@ -1447,6 +1447,11 @@ void PointCloud::deleteTransformation(void)
   std::remove(filename.c_str());
 }
 
+CGAL::Delaunay* PointCloud::getTriangulation(void)
+{
+  triangulate();return triangulation_;
+}
+
 void PointCloud::triangulate(void) const
 {
   if (triangulation_->number_of_vertices() != 0)
