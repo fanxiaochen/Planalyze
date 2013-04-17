@@ -88,6 +88,8 @@ public:
 
   bool getRemoveErrorPointsParameters(int& start_frame, int& end_frame, int& radius, bool with_frames = true);
 
+  bool getReverseFramesParameters(int& start_frame, int& end_frame, bool with_frames = true);
+
   bool getAllParameters(void);
 
 protected:

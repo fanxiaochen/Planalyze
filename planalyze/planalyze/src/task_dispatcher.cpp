@@ -283,6 +283,32 @@ void TaskRemoveErrorPoints::run(void) const
 
 }
 
+TaskReverseFrames::TaskReverseFrames(int frame, int start_frame, int end_frame)
+  :TaskImpl(frame, -1), start_frame_(start_frame), end_frame_(end_frame)
+{}
+
+TaskReverseFrames::~TaskReverseFrames(void)
+{}
+
+void TaskReverseFrames::run(void) const
+{
+  FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
+
+  QDir images_dir(model->rootPath()+"/images");
+  QDir points_dir(model->rootPath()+"/points");
+
+  QString frame_folder = QString("frame_%1_tmp").arg(frame_, 5, 10, QChar('0'));
+
+
+  int new_frame_number = start_frame_ + end_frame_ - frame_;
+  QString new_frame_folder = QString("frame_%1").arg(new_frame_number, 5, 10, QChar('0'));
+
+  images_dir.rename(frame_folder, new_frame_folder);
+  points_dir.rename(frame_folder, new_frame_folder);
+
+  return;
+}
+
 TaskExtractKeyFrames::TaskExtractKeyFrames(int frame, int offset, int start_frame, bool is_point, QString root_folder)
   :TaskImpl(frame, -1), offset_(offset), start_frame_(start_frame), is_point_(is_point), root_folder_(root_folder) 
 {}
@@ -1096,7 +1122,7 @@ void TaskDispatcher::dispathcTaskConvertPcd(void)
 
 void TaskDispatcher::dispathcTaskRemoveErrorPoints(void)
 {
-  if (!convert_pcd_tasks_.isEmpty())
+  if (!remove_error_points_tasks_.isEmpty())
   {
     QMessageBox::warning(MainWindow::getInstance(), "Remove Task Warning",
       "Run remove task after the previous one has finished");
@@ -1111,9 +1137,43 @@ void TaskDispatcher::dispathcTaskRemoveErrorPoints(void)
 
 
   for (int frame = start_frame; frame <= end_frame; frame ++)
-    remove_error_points_tasks_.push_back(Task(new TaskConvertPcd(frame)));
+    remove_error_points_tasks_.push_back(Task(new TaskRemoveErrorPoints(frame, radius)));
 
   runTasks(remove_error_points_tasks_, "Remove Error Points", false);
+
+  return;
+}
+
+void TaskDispatcher::dispathcTaskReverseFrames(void)
+{
+  if (!reverse_frames_tasks_.isEmpty())
+  {
+    QMessageBox::warning(MainWindow::getInstance(), "Reverse Task Warning",
+      "Run reverse task after the previous one has finished");
+    return;
+  }
+
+  int start_frame, end_frame;
+  if (!ParameterManager::getInstance()
+    .getReverseFramesParameters(start_frame, end_frame))
+    return;
+
+  FileSystemModel* model = MainWindow::getInstance()->getFileSystemModel();
+
+  QDir images_dir(model->rootPath()+"/images");
+  QDir points_dir(model->rootPath()+"/points");
+
+  for (int frame = end_frame; frame >= start_frame; frame --)
+  {
+    QString frame_folder = QString("frame_%1").arg(frame, 5, 10, QChar('0'));
+    images_dir.rename(frame_folder, frame_folder+"_tmp");
+    points_dir.rename(frame_folder, frame_folder+"_tmp");
+  }
+
+  for (int frame = start_frame; frame <= end_frame; frame ++)
+    reverse_frames_tasks_.push_back(Task(new TaskReverseFrames(frame, start_frame, end_frame)));
+
+  runTasks(reverse_frames_tasks_, "Reverse Frames", false);
 
   return;
 }
