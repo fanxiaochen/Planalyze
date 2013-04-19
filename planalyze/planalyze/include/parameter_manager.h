@@ -27,7 +27,6 @@ public:
   double getThicknessRadius(void) const;
   double getOrientationRadius(void) const;
   double getRegistrationMaxDistance(void) const;
-  int getColorizeMod(void) const;
   int getSmoothCost(void) const;
   int getStemComponentSize(void) const;
   int getLeafComponentSize(void) const;
@@ -136,8 +135,6 @@ private:
   IntParameter*                                       start_frame_;
   IntParameter*                                       end_frame_;
   IntParameter*                                       current_frame_;
-
-  IntParameter*                                       colorize_mod_;
 
   IntParameter*                                       smooth_cost_;
 

@@ -109,12 +109,7 @@ osg::Vec4 Organ::getColor(void) const
   if (point_indices_.empty())
     color = ColorMap::Instance().getColor(ColorMap::LIGHT_BLUE);
   else
-  {
-    int mod = ParameterManager::getInstance().getColorizeMod();
-    std::srand(id_+mod);
-    size_t color_idx = std::abs(std::rand())%mod;
-    color = ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, mod-1);
-  }
+    color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, is_leaf_?(2*id_+1):(2*id_));
 
   return color;
 }

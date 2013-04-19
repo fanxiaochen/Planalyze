@@ -37,8 +37,6 @@ private:
   std::map<int, PlotCurve*>       stem_curves_;
   std::map<QString, PlotCurve*>   other_curves_;
   StatisticsViewerWidget*         plot_;
-
-  std::vector<QString>            colors;
 };
 
 #endif // STATISTICS_H
