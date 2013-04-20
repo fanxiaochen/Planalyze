@@ -406,6 +406,8 @@ void MainWindow::setWorkspace(const QString& workspace)
   registrator_->reset();
   osg_viewer_widget_->removeChildren(true);
   file_viewer_widget_->setWorkspace(workspace_.toStdString());
+  FileSystemModel* file_system_model = getFileSystemModel();
+  statistics_viewer_widget_->setAxisScale(QwtPlot::xBottom, file_system_model->getStartFrame(), file_system_model->getEndFrame());
 
   ParameterManager::getInstance().loadParameters(workspace+"/parameters.xml");
 

@@ -107,7 +107,7 @@ public:
 
   size_t getLeafNum(void) const {return leaves_.size();}
   size_t getStemNum(void) const {return stems_.size();}
-  CGAL::Delaunay* getTriangulation(void) {return triangulation_;}
+  CGAL::Delaunay* getTriangulation(void);
 
   KdTreePtr getKdTree(void) {return kdtree_;}
   KdTreePtr getLeafKdTree(int id) const;

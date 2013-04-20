@@ -440,7 +440,6 @@ void PointCloud::visualizeStemGraph(void)
   if (!show_stem_graph_)
     return;
 
-  int mod = ParameterManager::getInstance().getColorizeMod();
   osg::Vec4 node_color = osg::Vec4(0.55f, 0.40f, 0.03f, 1.0f);
   osg::Vec4 edge_color = osg::Vec4(0.85f, 0.65f, 0.13f, 1.0f);
 
@@ -457,9 +456,7 @@ void PointCloud::visualizeStemGraph(void)
       if (id > 0)
       {
         id --;
-        std::srand(id+mod);
-        size_t color_idx = std::abs(std::rand())%mod;
-        color = ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, mod-1);
+        color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, 2*id);
       }
     }
     addChild(OSGUtility::drawSphere(g_stem_skeleton[i], node_radius, color));
@@ -476,9 +473,7 @@ void PointCloud::visualizeStemGraph(void)
     if (id > 0)
     {
       id --;
-      std::srand(id+mod);
-      size_t color_idx = std::abs(std::rand())%mod;
-      color = ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, mod-1);
+      color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, 2*id);
     }
 
     addChild(OSGUtility::drawCylinder(source, target, edge_radius, color));

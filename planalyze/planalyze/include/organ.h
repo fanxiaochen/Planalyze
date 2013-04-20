@@ -49,6 +49,8 @@ public:
   double distance(const CgalPoint& point);
   double distance(const Organ& organ);
 
+  double computeArea(void);
+
 private:
   osg::Vec4 getColor(void) const;
   std::vector<CgalPoint> getPoints(void) const;
