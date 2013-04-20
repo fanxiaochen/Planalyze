@@ -4,6 +4,11 @@ set(Boost_USE_STATIC_LIBS  ON)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF)
 
+find_package(Boost REQUIRED system thread)
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+endif(Boost_FOUND)
+
 find_package(3rdParty)
 
 find_package(Qwt REQUIRED)
@@ -13,11 +18,6 @@ find_package(Qextserialport REQUIRED)
 include_directories(${QEXTSERIALPORT_INCLUDE_DIR})
 
 find_package(OpenGL REQUIRED)
-
-find_package(Boost REQUIRED system thread)
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-endif(Boost_FOUND)
 
 find_package(CGAL REQUIRED)
 if(CGAL_FOUND)
