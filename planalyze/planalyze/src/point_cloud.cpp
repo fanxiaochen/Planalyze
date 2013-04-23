@@ -2,6 +2,7 @@
 
 #include <QRegExp>
 #include <QFileInfo>
+#include <QDockWidget>
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QFutureWatcher>
@@ -157,7 +158,9 @@ bool PointCloud::open(const std::string& filename)
   loadStatus();
   locker.relock();
   fillOrganPoints();
-  updateStatistics();
+
+  if (!MainWindow::getInstance()->getDockWidgetStatistics()->isHidden())
+    updateStatistics();
 
   expire();
 

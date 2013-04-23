@@ -38,8 +38,9 @@ MainWindow::MainWindow(void)
   axis_indicator_(new AxisIndicator),
   osg_viewer_widget_(NULL),
   file_viewer_widget_(NULL),
+  dock_widget_statistics_(NULL),
   statistics_viewer_widget_(NULL),
-    skeleton_sketcher_(NULL),
+  skeleton_sketcher_(NULL),
   information_(NULL),
   task_dispatcher_(new TaskDispatcher(this)),
   color_mode_(new QComboBox(this)),
@@ -205,12 +206,13 @@ void MainWindow::init(void)
   file_viewer_widget_->setParent(dock_widget_status_file);
   dock_widget_status_file->setWidget(file_viewer_widget_);
 
-  QDockWidget* dock_widget_statistics = new QDockWidget("Statistics", this);
-  addDockWidget(Qt::BottomDockWidgetArea, dock_widget_statistics);
-  dock_widget_statistics->setAllowedAreas(Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea);
-  ui_.menuView->addAction(dock_widget_statistics->toggleViewAction());
-  statistics_viewer_widget_->setParent(dock_widget_statistics);
-  dock_widget_statistics->setWidget(statistics_viewer_widget_);
+  dock_widget_statistics_ = new QDockWidget("Statistics", this);
+  addDockWidget(Qt::BottomDockWidgetArea, dock_widget_statistics_);
+  dock_widget_statistics_->setAllowedAreas(Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea);
+  ui_.menuBar->addAction(dock_widget_statistics_->toggleViewAction());
+  statistics_viewer_widget_->setParent(dock_widget_statistics_);
+  dock_widget_statistics_->setWidget(statistics_viewer_widget_);
+  dock_widget_statistics_->toggleViewAction()->setChecked(false);
 
   connect(this, SIGNAL(timeToUpdateStatusMessage(QString)), statusBar(), SLOT(showMessage(QString)));
 
