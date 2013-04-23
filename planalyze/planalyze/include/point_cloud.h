@@ -148,6 +148,7 @@ public:
   void trimOrgans(bool is_leaf);
 
   void jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
+  void deleteSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
 
 public slots:
   void setRotation(void);

@@ -34,6 +34,7 @@ protected:
   virtual void updateImpl(void);
 
   void addPoint(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
+  void removeEdge(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 
 private:
   osg::ref_ptr<osg::Vec3Array>  current_path_;

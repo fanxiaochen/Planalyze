@@ -86,6 +86,8 @@ bool SkeletonSketcher::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionA
       {
         if(ea.getModKeyMask()==osgGA::GUIEventAdapter::MODKEY_CTRL)
           addPoint(view, ea);
+        else if(ea.getModKeyMask()==osgGA::GUIEventAdapter::MODKEY_SHIFT)
+          removeEdge(view, ea);
         return false;
       }
     }
@@ -108,6 +110,26 @@ void SkeletonSketcher::addPoint(osgViewer::View* view, const osgGA::GUIEventAdap
   {
     osg::ref_ptr<PointCloud> point_cloud = MainWindow::getInstance()->getFileSystemModel()->getDisplayFirstFrame();
     point_cloud->jointSkeleton(current_path_->at(0), current_path_->at(1));
+
+    current_path_->clear();
+  }
+
+  expire();
+
+  return;
+}
+
+void SkeletonSketcher::removeEdge(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
+{
+  osg::Vec3 position = computeIntersection(view, ea, false);
+  if (position.isNaN())
+    return;
+
+  current_path_->push_back(position);
+  if (current_path_->size() == 2)
+  {
+    osg::ref_ptr<PointCloud> point_cloud = MainWindow::getInstance()->getFileSystemModel()->getDisplayFirstFrame();
+    point_cloud->deleteSkeleton(current_path_->at(0), current_path_->at(1));
 
     current_path_->clear();
   }

@@ -527,3 +527,44 @@ void PointCloud::jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2)
 
   return;
 }
+
+void PointCloud::deleteSkeleton(osg::Vec3 point_1, osg::Vec3 point_2)
+{
+  QMutexLocker locker(&mutex_);
+
+  boost::SkeletonGraph& g_skeleton = *stem_skeleton_graph_;
+  size_t skeleton_size = boost::num_vertices(g_skeleton);
+
+  double min_distance_1 = std::numeric_limits<double>::max();
+  double min_distance_2 = std::numeric_limits<double>::max();
+  size_t min_idx_1 = 0;
+  size_t min_idx_2 = 0;
+  for (size_t i = 0; i < skeleton_size; ++ i)
+  {
+    double distance_1 = (g_skeleton[i]-point_1).length2();
+    double distance_2 = (g_skeleton[i]-point_2).length2();
+
+    if (min_distance_1 > distance_1)
+    {
+      min_distance_1 = distance_1;
+      min_idx_1 = i;
+    }
+    if (min_distance_2 > distance_2)
+    {
+      min_distance_2 = distance_2;
+      min_idx_2 = i;
+    }
+  }
+
+  boost::remove_edge(min_idx_1, min_idx_2, g_skeleton);
+
+  stems_.clear();
+  std::vector<std::vector<size_t> > stem_conponents = extractStemComponents();
+  std::sort(stem_conponents.begin(), stem_conponents.end(), CompareComponentBySize());
+  for (size_t i = 0, i_end = stem_conponents.size(); i < i_end; ++ i)
+    addOrgan(stem_conponents[i], false);
+
+  expire();
+
+  return;
+}
