@@ -136,7 +136,7 @@ void PointCloud::classifyLeafStem(double smooth_cost, bool forward)
   std::vector<KdTreePtr> leaves_kdtrees(leaves_reference.size());
   for (size_t i = 0, i_end = leaves_reference.size(); i < i_end; ++ i)
     leaves_kdtrees[i] = point_cloud_reference->getLeafKdTree(i);
-
+  
   std::vector<Organ>& stems_reference = point_cloud_reference->getStems();
   std::vector<KdTreePtr> stems_kdtrees(stems_reference.size());
   for (size_t i = 0, i_end = stems_reference.size(); i < i_end; ++ i)

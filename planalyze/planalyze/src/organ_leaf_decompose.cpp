@@ -26,9 +26,6 @@ std::vector<std::vector<size_t> > PointCloud::computeLeafComponents(void)
       if (at(source_id).label != at(target_id).label || at(target_id).label != PclRichPoint::LABEL_LEAF)
         continue;
 
-      if (at(source_id).organ_id != at(target_id).organ_id)
-        continue;
-
       boost::add_edge(source_id, target_id, g_leaf_stem);
     }
 

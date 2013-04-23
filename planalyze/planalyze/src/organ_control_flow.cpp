@@ -101,7 +101,7 @@ PointCloud::KdTreePtr PointCloud::getOrganKdTree(int id, bool leaf) const
     std::cout << "frame: " << getFrame() << "\tgetOrganKdTree: error id > num !" << std::endl;
     return KdTreePtr((pcl::KdTreeFLANN<PclRichPoint>*)(NULL));
   }
-
+  
   const Organ& organ = (leaf)?(leaves_[id]):(stems_[id]);
   const std::vector<int>& organ_indices = organ.getPointIndices();
   boost::shared_ptr<std::vector<int> > indices(new std::vector<int>());

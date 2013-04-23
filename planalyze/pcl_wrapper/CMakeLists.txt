@@ -1,3 +1,7 @@
+set(Boost_USE_STATIC_LIBS  ON)
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF)
+
 find_package(Boost REQUIRED system)
 find_package(PCL REQUIRED common io registration kdtree search)
 

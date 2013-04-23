@@ -439,8 +439,6 @@ void PointCloud::updateImpl()
 
 osg::Vec4 PointCloud::getColor(size_t i) const
 {
-  int mod = ParameterManager::getInstance().getColorizeMod();
-
   const PclRichPoint& point = at(i);
   osg::Vec4 color(0.0f, 0.0f, 0.0f, 1.0f);
   switch (color_mode_)
@@ -466,11 +464,7 @@ osg::Vec4 PointCloud::getColor(size_t i) const
       if (point.segment_id == PclRichPoint::ID_UNINITIALIZED)
         color = osg::Vec4(point.r/255.0, point.g/255.0, point.b/255.0, 1.0);
       else
-      {
-        std::srand(point.segment_id+mod);
-        size_t color_idx = std::abs(std::rand())%mod;
-        color = ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, mod-1);
-      }
+        color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, point.segment_id);
     }
     break;
   case LABEL:
@@ -496,13 +490,7 @@ osg::Vec4 PointCloud::getColor(size_t i) const
       if (point.organ_id == PclRichPoint::ID_UNINITIALIZED)
         color = osg::Vec4(point.r/255.0, point.g/255.0, point.b/255.0, 1.0);
       else
-      {
-        std::srand(point.organ_id+mod);
-        size_t color_idx = std::abs(std::rand())%mod;
-        if (at(i).label == PclRichPoint::LABEL_STEM)
-          color_idx += mod;
-        color = osg::Vec4(ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, 2*mod+1));
-      }
+        color = osg::Vec4(ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, (point.label==PclRichPoint::LABEL_LEAF)?(2*point.organ_id+1):(2*point.organ_id)));
     }
     break;
   default:
@@ -514,8 +502,6 @@ osg::Vec4 PointCloud::getColor(size_t i) const
 
 void PointCloud::getColors(osg::Vec4Array* colors, size_t start, size_t end) const
 {
-  int mod = ParameterManager::getInstance().getColorizeMod();
-
   switch (color_mode_)
   {
   case UNIFORM:
@@ -579,11 +565,7 @@ void PointCloud::getColors(osg::Vec4Array* colors, size_t start, size_t end) con
       if (point.segment_id == PclRichPoint::ID_UNINITIALIZED)
         colors->push_back(osg::Vec4(point.r/255.0, point.g/255.0, point.b/255.0, 1.0));
       else
-      {
-        std::srand(point.segment_id+mod);
-        size_t color_idx = std::abs(std::rand())%mod;
-        colors->push_back(ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, mod-1));
-      }
+        colors->push_back(ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, point.segment_id));
     }
     break;
   case LABEL:
@@ -639,13 +621,7 @@ void PointCloud::getColors(osg::Vec4Array* colors, size_t start, size_t end) con
       if (point.organ_id == PclRichPoint::ID_UNINITIALIZED)
         colors->push_back(osg::Vec4(point.r/255.0, point.g/255.0, point.b/255.0, 1.0));
       else
-      {
-        std::srand(point.organ_id+mod);
-        size_t color_idx = std::abs(std::rand())%mod;
-        if (at(i).label == PclRichPoint::LABEL_STEM)
-          color_idx += mod;
-        colors->push_back(osg::Vec4(ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, 2*mod+1)));
-      }
+        colors->push_back(osg::Vec4(ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, (point.label==PclRichPoint::LABEL_LEAF)?(2*point.organ_id+1):(2*point.organ_id))));
     }
     break;
   default:
@@ -735,8 +711,6 @@ void PointCloud::povray(SlavePovRayVisitor* povray_visitor) const
   if (show_stem_graph_)
   {
     boost::SkeletonGraph& g_stem_skeleton = *stem_skeleton_graph_;
-
-    int mod = ParameterManager::getInstance().getColorizeMod();
     osg::Vec4 node_color = osg::Vec4(0.55f, 0.40f, 0.03f, 1.0f);
     osg::Vec4 edge_color = osg::Vec4(0.85f, 0.65f, 0.13f, 1.0f);
 
@@ -750,9 +724,7 @@ void PointCloud::povray(SlavePovRayVisitor* povray_visitor) const
         if (id > 0)
         {
           id --;
-          std::srand(id+mod);
-          size_t color_idx = std::abs(std::rand())%mod;
-          color = ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, mod-1);
+          color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, 2*id);
         }
       }
       povray_visitor->drawSphere(Caster<osg::Vec3, CgalPoint>(g_stem_skeleton[i]),
@@ -772,9 +744,7 @@ void PointCloud::povray(SlavePovRayVisitor* povray_visitor) const
       if (id > 0)
       {
         id --;
-        std::srand(id+mod);
-        size_t color_idx = std::abs(std::rand())%mod;
-        color = ColorMap::Instance().getColor(ColorMap::JET, color_idx, 0, mod-1);
+        color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, 2*id);
       }
       povray_visitor->drawCylinder(Caster<osg::Vec3, CgalPoint>(source), Caster<osg::Vec3, CgalPoint>(target),
         stem_skeleton_edge_radius, color);
@@ -1445,6 +1415,11 @@ void PointCloud::deleteTransformation(void)
 {
   std::string filename = (QFileInfo(filename_.c_str()).path()+"/transformation.txt").toStdString();
   std::remove(filename.c_str());
+}
+
+CGAL::Delaunay* PointCloud::getTriangulation(void)
+{
+  triangulate();return triangulation_;
 }
 
 void PointCloud::triangulate(void) const

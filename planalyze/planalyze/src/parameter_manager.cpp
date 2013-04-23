@@ -35,7 +35,6 @@ ParameterManager::ParameterManager(void)
   end_frame_(new IntParameter("End Frame", "End Frame", -1, -1, -1, 1)),
   current_frame_(new IntParameter("Current Frame", "Current Frame", -1, -1, -1, 1)),
   segment_threshold_(new IntParameter("Segment Threshold", "Segment Threshold", 8, 3, 2048, 1)),
-  colorize_mod_(new IntParameter("Colorize Random Seed", "Colorize Random Seed", 19, 1, 23, 1)),
   smooth_cost_(new IntParameter("Smooth Cost", "Smooth Cost", 10, 1, 1000, 1)),
   downsampling_(new IntParameter("Downsampling", "Downsampling", 1, 1, 100, 1)),
   leaf_component_size_threshold_(new IntParameter("Leaf Component Size", "Leaf Component Size", 128, 4, 10240)),
@@ -69,7 +68,6 @@ ParameterManager::~ParameterManager(void)
   delete virtual_scan_noise_;
   delete virtual_scan_distance_;
   delete virtual_scan_resolution_;
-  delete colorize_mod_;
   delete smooth_cost_;
   delete leaf_component_size_threshold_;
   delete stem_component_size_threshold_;
@@ -560,15 +558,9 @@ bool ParameterManager::getBadFramesParameters(int& start_frame, int& end_frame ,
 }
 
 
-int ParameterManager::getColorizeMod(void) const
-{
-  return *colorize_mod_;
-}
-
 bool ParameterManager::getAllParameters(void)
 {
   ParameterDialog parameter_dialog("All Parameters", MainWindow::getInstance());
-  parameter_dialog.addParameter(colorize_mod_);
   parameter_dialog.addParameter(orientation_radius_);
   parameter_dialog.addParameter(smooth_cost_);
   parameter_dialog.addParameter(stem_component_size_threshold_);

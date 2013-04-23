@@ -1,3 +1,4 @@
+#include "color_map.h"
 #include "statistics_viewer_widget.h"
 
 #include "statistics.h"
@@ -37,16 +38,6 @@ void PlotCurve::updateSamples(void)
 Statistics::Statistics(StatisticsViewerWidget* plot)
   :plot_(plot)
 {
-  colors.push_back("LightSalmon");
-  colors.push_back("SteelBlue");
-  colors.push_back("Yellow");
-  colors.push_back("Fuchsia");
-  colors.push_back("PaleGreen");
-  colors.push_back("PaleTurquoise");
-  colors.push_back("Cornsilk");
-  colors.push_back("HotPink");
-  colors.push_back("Peru");
-  colors.push_back("Maroon");
 }
 
 Statistics::~Statistics(void)
@@ -70,7 +61,8 @@ void Statistics::addLeafSample(int id, int frame, double value)
     QString title = QString("Leaf %2").arg(id, 2, 10, QChar('0'));
     PlotCurve* plot_curve = new PlotCurve(title);
     it = leaf_curves_.insert(std::make_pair(id, plot_curve)).first;
-    it->second->setPen(QColor(colors[id%colors.size()]), 2);
+    osg::Vec4 color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, id*2+1);
+    it->second->setPen(QColor(color.r()*255, color.g()*255, color.b()*255), 2);
     it->second->attach(plot_);
   }
 
@@ -87,8 +79,9 @@ void Statistics::addStemSample(int id, int frame, double value)
   {
     QString title = QString("Stem %2").arg(id, 2, 10, QChar('0'));
     PlotCurve* plot_curve = new PlotCurve(title);
-    it = stem_curves_.insert(std::make_pair(id, plot_curve)).first;
-    it->second->setPen(QColor(colors[id%colors.size()]), 2);
+    it = leaf_curves_.insert(std::make_pair(id, plot_curve)).first;
+    osg::Vec4 color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, id*2);
+    it->second->setPen(QColor(color.r()*255, color.g()*255, color.b()*255), 2);
     it->second->attach(plot_);
   }
 
@@ -105,7 +98,8 @@ void Statistics::addOtherSample(const QString& title, int frame, double value)
   {
     PlotCurve* plot_curve = new PlotCurve(title);
     it = other_curves_.insert(std::make_pair(title, plot_curve)).first;
-    it->second->setPen(QColor(colors[rand()%colors.size()]), 2);
+    osg::Vec4 color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, rand());
+    it->second->setPen(QColor(color.r()*255, color.g()*255, color.b()*255), 2);
     it->second->attach(plot_);
   }
 
