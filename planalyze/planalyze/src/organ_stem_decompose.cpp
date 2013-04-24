@@ -12,7 +12,6 @@
 #include "cgal_types.h"
 #include "main_window.h"
 #include "osg_utility.h"
-#include "registrator.h"
 #include "cgal_utility.h"
 #include "parameter_manager.h"
 #include "point_cloud.h"
@@ -37,20 +36,6 @@ void PointCloud::sampleSkeletonPoints(void)
       boost::add_vertex(at(stem_points[i]).cast<osg::Vec3>(), g_stem_skeleton);
   }
 
-  Registrator* registrator = MainWindow::getInstance()->getRegistrator();
-  osg::Vec3 point = registrator->getPivotPoint();
-  // quantize the points
-  int quantize = 4;
-  for (size_t i = 0, i_end = boost::num_vertices(g_stem_skeleton); i < i_end; ++ i)
-  {
-    double distance = (g_stem_skeleton[i]-point).length();
-    double quantize_distance = distance/quantize;
-    quantize_distance = (int)(distance/quantize+0.5)*quantize;
-    osg::Vec3 vector = g_stem_skeleton[i]-point;
-    vector.normalize();
-    g_stem_skeleton[i] = point + vector*quantize_distance;
-  }
-
   expire();
 
   return;
@@ -63,9 +48,6 @@ void PointCloud::centerSkeletonPoints(void)
     return;
 
   QMutexLocker locker(&mutex_);
-
-  Registrator* registrator = MainWindow::getInstance()->getRegistrator();
-  CgalVector reg_normal = Caster<osg::Vec3, CgalVector>(registrator->getAxisNormal());
 
   pcl::PointCloud<PclPoint>::Ptr stem_skeleton(new pcl::PointCloud<PclPoint>());
   for (size_t i = 0, i_end = boost::num_vertices(g_stem_skeleton); i < i_end; ++ i)
@@ -103,8 +85,6 @@ void PointCloud::centerSkeletonPoints(void)
           center = center/total_weight;
       }
 
-#define SH_METHOD
-#ifdef SH_METHOD
       osg::Vec3 span(0.0f, 0.0f, 0.0f);
       {
         std::vector<int> neighbor_indices;
@@ -122,51 +102,11 @@ void PointCloud::centerSkeletonPoints(void)
           span = span/total_weight;
       }
       g_stem_skeleton[i] = center + span*0.4;
-#else
-      CgalPoint old_position = Caster<osg::Vec3, CgalPoint>(g_stem_skeleton[i]);
-      CgalPoint new_position = Caster<osg::Vec3, CgalPoint>(center);
-      CgalLine line(new_position, reg_normal);
-      CgalPoint projection = line.projection(old_position);
-      g_stem_skeleton[i] = Caster<CgalPoint, osg::Vec3>(projection);
-#endif
     }
 
     for (size_t i = 0, i_end = i_end = boost::num_vertices(g_stem_skeleton); i < i_end; ++ i)
       stem_skeleton->at(i) = PclPoint(g_stem_skeleton[i]);
   }
-
-  std::vector<bool> flags(boost::num_vertices(g_stem_skeleton), true);
-  boost::shared_ptr<pcl::KdTreeFLANN<PclPoint> > kdtree(new pcl::KdTreeFLANN<PclPoint>(false));
-  kdtree->setInputCloud(stem_skeleton);
-
-  boost::SkeletonGraph g_filtered;
-  double isolated_threshold = search_radius;
-  double close_threshold = search_radius/4.0;
-  close_threshold *= close_threshold;
-  for (size_t i = 0, i_end = boost::num_vertices(g_stem_skeleton); i < i_end; ++ i)
-  {
-    if (!flags[i])
-      continue;
-
-    std::vector<int> neighbor_indices;
-    std::vector<float> neighbor_squared_distances;
-    int neighbor_num = kdtree->radiusSearch(stem_skeleton->at(i), isolated_threshold, neighbor_indices, neighbor_squared_distances);
-    if (neighbor_num == 0)
-    {
-      flags[i] = false;
-      continue;
-    }
-
-    boost::add_vertex(g_stem_skeleton[i], g_filtered);
-    for (size_t j = 0; j < neighbor_num; ++ j)
-    {
-      if (neighbor_squared_distances[j] > close_threshold)
-        continue;
-
-      flags[neighbor_indices[j]] = false;
-    }
-  }
-  g_stem_skeleton = g_filtered;
 
   expire();
 
@@ -232,57 +172,6 @@ void PointCloud::filterStemSkeletonByDegree(void)
 
     boost::clear_vertex(i, g_stem_skeleton);
   }
-
-  expire();
-
-  return;
-}
-
-void PointCloud::filterStemSkeletonByAngle(void)
-{
-  QMutexLocker locker(&mutex_);
-
-  boost::SkeletonGraph& g_stem_skeleton = *stem_skeleton_graph_;
-
-  // filter by angle
-  typedef boost::SkeletonGraph::out_edge_iterator out_edge_iterator;
-  for (size_t i = 0, i_end = boost::num_vertices(g_stem_skeleton); i < i_end; ++ i)
-  {
-    if (boost::degree(i, g_stem_skeleton) <= 1)
-      continue;
-
-    std::pair<out_edge_iterator, out_edge_iterator> out_edges = boost::out_edges(i, g_stem_skeleton);
-    out_edge_iterator it_0 = out_edges.first;
-    out_edge_iterator it_2 = ++ out_edges.first;
-    const osg::Vec3& point_0 = g_stem_skeleton[boost::target(*it_0, g_stem_skeleton)];
-    const osg::Vec3& point_1 = g_stem_skeleton[i];
-    const osg::Vec3& point_2 = g_stem_skeleton[boost::target(*it_2, g_stem_skeleton)];
-
-    osg::Vec3 vector_0_1 = point_1-point_0;
-    osg::Vec3 vector_1_2 = point_2-point_1;
-    vector_0_1.normalize();
-    vector_1_2.normalize();
-
-    double angle = std::acos(vector_0_1*vector_1_2);
-    if (angle < M_PI/6)
-      continue;
-
-    boost::clear_vertex(i, g_stem_skeleton);
-  }
-
-  expire();
-
-  return;
-}
-
-
-void PointCloud::filterStemSkeletonByLength(void)
-{
-  QMutexLocker locker(&mutex_);
-
-  std::vector<std::vector<size_t> > stem_components = extractStemComponents();
-  for (size_t i = 0, i_end = stem_components.size(); i < i_end; ++ i)
-    addOrgan(stem_components[i], false);
 
   expire();
 
@@ -400,7 +289,6 @@ void PointCloud::computeStemSkeleton(void)
   centerSkeletonPoints();
   computeStemSkeletonMST();
   filterStemSkeletonByDegree();
-  //filterStemSkeletonByAngle();
 
   return;
 }
@@ -417,7 +305,6 @@ void PointCloud::initializeStemSkeleton(void)
 {
   return;
 }
-
 
 void PointCloud::absoluteDetectStems(void)
 {

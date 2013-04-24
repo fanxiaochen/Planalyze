@@ -209,8 +209,6 @@ protected:
   void centerSkeletonPoints(void);
   void computeStemSkeletonMST(void);
   void filterStemSkeletonByDegree(void);
-  void filterStemSkeletonByAngle(void);
-  void filterStemSkeletonByLength(void);
 
   void initGcoGraphEdges(GCoptimizationGeneralGraph* gco, int smooth_cost);
   void initGcoGraphEdgesStems(GCoptimizationGeneralGraph* gco, int smooth_cost, const std::vector<size_t>& reverse_indices);

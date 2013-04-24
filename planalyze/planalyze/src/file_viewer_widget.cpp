@@ -53,8 +53,6 @@ void FileViewerWidget::contextMenuEvent(QContextMenuEvent *event)
     skeleton_menu->addAction("Centralize Points", point_cloud, SLOT(centerSkeletonPoints()));
     skeleton_menu->addAction("Compute Stem MST", point_cloud, SLOT(computeStemSkeletonMST()));
     skeleton_menu->addAction("Filter By Degree", point_cloud, SLOT(filterStemSkeletonByDegree()));
-    skeleton_menu->addAction("Filter By Angle", point_cloud, SLOT(filterStemSkeletonByAngle()));
-    skeleton_menu->addAction("Filter By Length", point_cloud, SLOT(filterStemSkeletonByLength()));
   }
 
   QMenu* colorize_menu = menu.addMenu("Colorize Point Cloud");
