@@ -120,10 +120,6 @@ public:
   void smoothLeaves(double smooth_cost, bool forward);
   void smoothStems(double smooth_cost, bool forward);
 
-  void absoluteClassify(double smooth_cost);
-  void absoluteDetectLeaves(void);
-  void absoluteDetectStems(void);
-
   static double transformCurvature(double curvature);
 
   static double getGlobalLeafFlatness(void);
@@ -144,7 +140,6 @@ public:
   static double getPointFeature(const PclRichPoint& point);
   static double getOrganFeature(const Organ& organ);
 
-  void printOrgans(void);
   void trimOrgans(bool is_leaf);
 
   void jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
@@ -178,15 +173,14 @@ public slots:
 
   void loadStatus(void);
   void saveStatus(void);
-
-  void sampleSkeletonPoints(void);
-  void centerSkeletonPoints(void);
-  void computeStemSkeletonMST(void);
-  void filterStemSkeletonByDegree(void);
-  void filterStemSkeletonByAngle(void);
-  void filterStemSkeletonByLength(void);
-
   void save(void);
+
+  void absoluteClassify(double smooth_cost);
+  void absoluteDetectLeaves(void);
+  void computeStemSkeleton(void);
+  void initializeStemSkeleton(void);
+  void absoluteDetectStems(void);
+  void printOrgans(void);
 
 protected:
   virtual void clearData();
@@ -211,6 +205,13 @@ protected:
   void initPointGraph(double distance_threshold);
   void denoise(int segment_threshold, double triangle_length);
 
+  void sampleSkeletonPoints(void);
+  void centerSkeletonPoints(void);
+  void computeStemSkeletonMST(void);
+  void filterStemSkeletonByDegree(void);
+  void filterStemSkeletonByAngle(void);
+  void filterStemSkeletonByLength(void);
+
   void initGcoGraphEdges(GCoptimizationGeneralGraph* gco, int smooth_cost);
   void initGcoGraphEdgesStems(GCoptimizationGeneralGraph* gco, int smooth_cost, const std::vector<size_t>& reverse_indices);
   void initGcoGraphEdgesLeaves(GCoptimizationGeneralGraph* gco, int smooth_cost, const std::vector<size_t>& reverse_indices);
@@ -219,7 +220,6 @@ protected:
 
   void addOrgan(const std::vector<size_t>& stem_point_indices, bool leaf);
   std::vector<std::vector<size_t> > computeLeafComponents(void);
-  std::vector<std::vector<size_t> > computeStemComponents(void);
   std::vector<std::vector<size_t> > extractStemComponents(void);
 
   void collectStems(void);

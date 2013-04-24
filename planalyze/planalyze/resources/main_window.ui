@@ -149,6 +149,8 @@
     <addaction name="separator"/>
     <addaction name="actionAbsoluteClassify"/>
     <addaction name="actionDecomposeLeaves"/>
+    <addaction name="actionComputeSkeleton"/>
+    <addaction name="actionInitializeSkeleton"/>
     <addaction name="actionDecomposeStems"/>
     <addaction name="separator"/>
    </widget>
@@ -589,6 +591,16 @@
   <action name="actionReverseFrames">
    <property name="text">
     <string>Reverse Frames</string>
+   </property>
+  </action>
+  <action name="actionComputeSkeleton">
+   <property name="text">
+    <string>Compute Skeleton</string>
+   </property>
+  </action>
+  <action name="actionInitializeSkeleton">
+   <property name="text">
+    <string>Initialize Skeleton</string>
    </property>
   </action>
  </widget>

@@ -36,16 +36,6 @@ double PointCloud::getGlobalStemFlatness(void)
   return std::log10(1/3.0);
 }
 
-double PointCloud::getGlobalLeafThickness(void)
-{
-  return ParameterManager::getInstance().getThicknessRadius();
-}
-
-double PointCloud::getGlobalStemThickness(void)
-{
-  return ParameterManager::getInstance().getStemThickness();
-}
-
 double PointCloud::getGlobalLeafFeature(void)
 {
   return getGlobalLeafFlatness();

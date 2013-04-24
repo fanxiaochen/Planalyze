@@ -101,6 +101,8 @@ public slots:
 
   void absoluteClassify(void);
   void absoluteDetectLeaves(void);
+  void computeStemSkeleton(void);
+  void initializeStemSkeleton(void);
   void absoluteDetectStems(void);
 
 signals:
@@ -138,10 +140,6 @@ private:
   void bSmoothStems(double smooth_cost, int start_frame, int end_frame);
   void fSmoothLeaves(double smooth_cost, int start_frame, int end_frame);
   void bSmoothLeaves(double smooth_cost, int start_frame, int end_frame);
-
-  void absoluteClassify(double smooth_cost, int start_frame, int end_frame);
-  void absoluteDetectLeaves(int start_frame, int end_frame);
-  void absoluteDetectStems(int start_frame, int end_frame);
 
 private:
   bool recursiveCheck(const QModelIndex &index, const QVariant &value);

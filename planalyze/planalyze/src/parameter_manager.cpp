@@ -42,7 +42,6 @@ ParameterManager::ParameterManager(void)
   stem_skeleton_radius_(new DoubleParameter("Stem Skeleton Radius", "Stem Skeleton Radius", 4, 0.5, 16, 0.5)),
   stem_length_threshold_(new DoubleParameter("Stem Skeleton Length", "Stem Skeleton Length", 8, 0.5, 32, 0.5)),
   curvature_quantize_(new DoubleParameter("Curvature Quantize", "Threshold Quantize", 0.0015, 0.00001, 0.1, 0.00001)),
-  stem_thickness_(new DoubleParameter("Stem Thickness", "Stem Thickness", 2.0, 0.1, 16.0, 0.1)),
   triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 1.5, 1.0, 8.0, 0.1)),
   radius_(new IntParameter("Radius", "Radius", 500, 500, 1000, 1)),
   times_(new IntParameter("Times", "Times", 5, 1, 100)),
@@ -74,7 +73,6 @@ ParameterManager::~ParameterManager(void)
   delete stem_skeleton_radius_;
   delete stem_length_threshold_;
   delete curvature_quantize_;
-  delete stem_thickness_;
   delete triangle_length_;
 }
 
@@ -144,11 +142,6 @@ int ParameterManager::getSmoothCost(void) const
 double ParameterManager::getCurvatureQuantize(void) const
 {
   return *curvature_quantize_;
-}
-
-double ParameterManager::getStemThickness(void) const
-{
-  return *stem_thickness_;
 }
 
 void ParameterManager::addFrameParameters(ParameterDialog* parameter_dialog, bool with_frames)
@@ -224,10 +217,16 @@ bool ParameterManager::getStemSkeletonLength(double& stem_skeleton_length)
   return true;
 }
 
-bool ParameterManager::getTrackAndEvolveParameters(double& smooth_cost)
+bool ParameterManager::getTrackAndEvolveParameters(double& smooth_cost, int& frame)
 {
-  int place_holder_1, place_holder_2;
-  return getTrackAndEvolveParameters(smooth_cost, place_holder_1, place_holder_2, false);
+  ParameterDialog parameter_dialog("Track and Evolve Parameters", MainWindow::getInstance());
+  parameter_dialog.addParameter(smooth_cost_);
+  parameter_dialog.addParameter(current_frame_);
+
+  if (!parameter_dialog.exec() == QDialog::Accepted)
+    return false;
+
+  return true;
 }
 
 bool ParameterManager::getTrackAndEvolveParameters(double& smooth_cost, int& start_frame, int& end_frame, bool with_frames)
@@ -569,7 +568,6 @@ bool ParameterManager::getAllParameters(void)
   parameter_dialog.addParameter(stem_length_threshold_);
   parameter_dialog.addParameter(curvature_quantize_);
   parameter_dialog.addParameter(triangle_length_);
-  parameter_dialog.addParameter(stem_thickness_);
   if (!parameter_dialog.exec() == QDialog::Accepted)
     return false;
 
@@ -625,10 +623,6 @@ void ParameterManager::loadParameters(const QString& filename)
   double_value = curvature_quantize.attribute("value", "").toDouble();
   if (double_value != 0.0) curvature_quantize_->setValue(double_value);
 
-  QDomElement stem_thickness = root.firstChildElement("stem_thickness");
-  double_value = stem_thickness.attribute("value", "").toDouble();
-  if (double_value != 0.0) stem_thickness_->setValue(double_value);
-
   QDomElement triangle_length = root.firstChildElement("triangle_length");
   double_value = triangle_length.attribute("value", "").toDouble();
   if (double_value != 0.0) triangle_length_->setValue(double_value);
@@ -669,10 +663,6 @@ void ParameterManager::saveParameters(const QString& filename)
   QDomElement curvature_quantize = doc.createElement(QString("curvature_quantize"));
   curvature_quantize.setAttribute("value", (double)(*curvature_quantize_));
   root.appendChild(curvature_quantize);
-
-  QDomElement stem_thickness = doc.createElement(QString("stem_thickness"));
-  stem_thickness.setAttribute("value", (double)(*stem_thickness_));
-  root.appendChild(stem_thickness);
 
   QDomElement triangle_length = doc.createElement(QString("triangle_length"));
   triangle_length.setAttribute("value", (double)(*triangle_length_));

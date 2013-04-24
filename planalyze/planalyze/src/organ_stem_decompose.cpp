@@ -394,7 +394,7 @@ std::vector<std::vector<size_t> > PointCloud::extractStemComponents(void)
   return stem_components;
 }
 
-std::vector<std::vector<size_t> > PointCloud::computeStemComponents(void)
+void PointCloud::computeStemSkeleton(void)
 {
   sampleSkeletonPoints();
   centerSkeletonPoints();
@@ -402,7 +402,7 @@ std::vector<std::vector<size_t> > PointCloud::computeStemComponents(void)
   filterStemSkeletonByDegree();
   //filterStemSkeletonByAngle();
 
-  return extractStemComponents();
+  return;
 }
 
 struct CompareComponentBySize
@@ -413,6 +413,12 @@ struct CompareComponentBySize
   }
 };
 
+void PointCloud::initializeStemSkeleton(void)
+{
+  return;
+}
+
+
 void PointCloud::absoluteDetectStems(void)
 {
   QMutexLocker locker(&mutex_);
@@ -420,10 +426,7 @@ void PointCloud::absoluteDetectStems(void)
   std::cout << "frame: " << getFrame() << "\tabs detecting stems..." << std::endl;
 
   stems_.clear();
-
-  locker.unlock();
-  std::vector<std::vector<size_t> > stem_conponents = computeStemComponents();
-  locker.relock();
+  std::vector<std::vector<size_t> > stem_conponents = extractStemComponents();
 
   std::sort(stem_conponents.begin(), stem_conponents.end(), CompareComponentBySize());
   for (size_t i = 0, i_end = stem_conponents.size(); i < i_end; ++ i)

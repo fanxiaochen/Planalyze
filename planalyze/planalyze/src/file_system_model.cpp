@@ -1235,51 +1235,6 @@ void FileSystemModel::bSmoothLeaves(double smooth_cost, int start_frame, int end
   return;
 }
 
-void FileSystemModel::absoluteClassify(double smooth_cost, int start_frame, int end_frame)
-{
-  for (int frame = start_frame; frame <= end_frame; ++ frame)
-  {
-    osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-    point_cloud->absoluteClassify(smooth_cost);
-    point_cloud->printOrgans();
-
-    timeToHideAndShowPointCloud(frame-1, 12, frame, 12);
-    emit progressValueChanged(frame-start_frame+1);
-  }
-
-  return;
-}
-
-void FileSystemModel::absoluteDetectLeaves(int start_frame, int end_frame)
-{
-  for (int frame = start_frame; frame <= end_frame; ++ frame)
-  {
-    osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-    point_cloud->absoluteDetectLeaves();
-    point_cloud->printOrgans();
-
-    timeToHideAndShowPointCloud(frame-1, 12, frame, 12);
-    emit progressValueChanged(frame-start_frame+1);
-  }
-
-  return;
-}
-
-void FileSystemModel::absoluteDetectStems(int start_frame, int end_frame)
-{
-  for (int frame = start_frame; frame <= end_frame; ++ frame)
-  {
-    osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-    point_cloud->absoluteDetectStems();
-    point_cloud->printOrgans();
-
-    timeToHideAndShowPointCloud(frame-1, 12, frame, 12);
-    emit progressValueChanged(frame-start_frame+1);
-  }
-
-  return;
-}
-
 void FileSystemModel::forwardClassify(void)
 {
   int start_frame, end_frame;
@@ -1423,69 +1378,81 @@ void FileSystemModel::fSmoothLeaves(void)
 
 void FileSystemModel::absoluteClassify(void)
 {
-  int start_frame, end_frame;
+  int frame;
   double smooth_cost;
-  if (!ParameterManager::getInstance().getTrackAndEvolveParameters(smooth_cost, start_frame, end_frame))
+  if (!ParameterManager::getInstance().getTrackAndEvolveParameters(smooth_cost, frame))
     return;
 
-  ProgressBar* progress_bar = new ProgressBar(MainWindow::getInstance());
-  progress_bar->setRange(0, end_frame-start_frame+1);
-  progress_bar->setValue(0);
-  progress_bar->setFormat(QString("Absolute Classify Leaf/Stem: %p% completed"));
-  progress_bar->setTextVisible(true);
-  MainWindow::getInstance()->statusBar()->addPermanentWidget(progress_bar);
+  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(this, SIGNAL(progressValueChanged(int)), progress_bar, SLOT(setValue(int)));
-  connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
+  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
 
-  watcher->setFuture(QtConcurrent::run(this, &FileSystemModel::absoluteClassify, smooth_cost, start_frame, end_frame));
+  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::absoluteClassify, smooth_cost));
 
   return;
 }
 
 void FileSystemModel::absoluteDetectLeaves(void)
 {
-  int start_frame, end_frame;
-  double smooth_cost;
-  if (!ParameterManager::getInstance().getTrackAndEvolveParameters(smooth_cost, start_frame, end_frame))
+  int frame;
+  if (!ParameterManager::getInstance().getFrameParameter(frame))
     return;
 
-  ProgressBar* progress_bar = new ProgressBar(MainWindow::getInstance());
-  progress_bar->setRange(0, end_frame-start_frame+1);
-  progress_bar->setValue(0);
-  progress_bar->setFormat(QString("Absolute Detect Leaves: %p% completed"));
-  progress_bar->setTextVisible(true);
-  MainWindow::getInstance()->statusBar()->addPermanentWidget(progress_bar);
+  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(this, SIGNAL(progressValueChanged(int)), progress_bar, SLOT(setValue(int)));
-  connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
+  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
 
-  watcher->setFuture(QtConcurrent::run(this, &FileSystemModel::absoluteDetectLeaves, start_frame, end_frame));
+  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::absoluteDetectLeaves));
 
   return;
 }
 
 void FileSystemModel::absoluteDetectStems(void)
 {
-  int start_frame, end_frame;
-  double smooth_cost;
-  if (!ParameterManager::getInstance().getTrackAndEvolveParameters(smooth_cost, start_frame, end_frame))
+  int frame;
+  if (!ParameterManager::getInstance().getFrameParameter(frame))
     return;
 
-  ProgressBar* progress_bar = new ProgressBar(MainWindow::getInstance());
-  progress_bar->setRange(0, end_frame-start_frame+1);
-  progress_bar->setValue(0);
-  progress_bar->setFormat(QString("Absolute Detect Stems: %p% completed"));
-  progress_bar->setTextVisible(true);
-  MainWindow::getInstance()->statusBar()->addPermanentWidget(progress_bar);
+  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(this, SIGNAL(progressValueChanged(int)), progress_bar, SLOT(setValue(int)));
-  connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
+  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
 
-  watcher->setFuture(QtConcurrent::run(this, &FileSystemModel::absoluteDetectStems, start_frame, end_frame));
+  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::absoluteDetectStems));
+
+  return;
+}
+
+void FileSystemModel::computeStemSkeleton(void)
+{
+  int frame;
+  if (!ParameterManager::getInstance().getFrameParameter(frame))
+    return;
+
+  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
+
+  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::computeStemSkeleton));
+
+  return;
+}
+
+void FileSystemModel::initializeStemSkeleton(void)
+{
+  int frame;
+  if (!ParameterManager::getInstance().getFrameParameter(frame))
+    return;
+
+  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
+
+  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::initializeStemSkeleton));
 
   return;
 }

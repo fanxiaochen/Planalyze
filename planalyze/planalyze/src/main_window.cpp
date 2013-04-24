@@ -213,6 +213,7 @@ void MainWindow::init(void)
   statistics_viewer_widget_->setParent(dock_widget_statistics_);
   dock_widget_statistics_->setWidget(statistics_viewer_widget_);
   dock_widget_statistics_->toggleViewAction()->setChecked(false);
+  dock_widget_statistics_->setHidden(true);
 
   connect(this, SIGNAL(timeToUpdateStatusMessage(QString)), statusBar(), SLOT(showMessage(QString)));
 
@@ -245,6 +246,8 @@ void MainWindow::init(void)
   connect(ui_.actionBSmoothLeaves, SIGNAL(triggered()), file_system_model, SLOT(bSmoothLeaves()));
   connect(ui_.actionAbsoluteClassify, SIGNAL(triggered()), file_system_model, SLOT(absoluteClassify()));
   connect(ui_.actionDecomposeLeaves, SIGNAL(triggered()), file_system_model, SLOT(absoluteDetectLeaves()));
+  connect(ui_.actionComputeSkeleton, SIGNAL(triggered()), file_system_model, SLOT(computeStemSkeleton()));
+  connect(ui_.actionInitializeSkeleton, SIGNAL(triggered()), file_system_model, SLOT(initializeStemSkeleton()));
   connect(ui_.actionDecomposeStems, SIGNAL(triggered()), file_system_model, SLOT(absoluteDetectStems()));
 
   //rendering menu
