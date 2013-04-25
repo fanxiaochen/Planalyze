@@ -146,10 +146,6 @@
     <addaction name="actionFSmoothStems"/>
     <addaction name="actionBSmoothStems"/>
     <addaction name="separator"/>
-    <addaction name="actionAbsoluteClassify"/>
-    <addaction name="actionDecomposeLeaves"/>
-    <addaction name="actionInitializeSkeleton"/>
-    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuCapture">
     <property name="title">
@@ -532,16 +528,6 @@
     <string>BSmooth Stems</string>
    </property>
   </action>
-  <action name="actionDecomposeLeaves">
-   <property name="text">
-    <string>Decompose Leaves</string>
-   </property>
-  </action>
-  <action name="actionAbsoluteClassify">
-   <property name="text">
-    <string>Absolute Classify</string>
-   </property>
-  </action>
   <action name="actionConvertPcdToPlainText">
    <property name="text">
     <string>Convert Pcd To Plain Text</string>
@@ -570,11 +556,6 @@
   <action name="actionReverseFrames">
    <property name="text">
     <string>Reverse Frames</string>
-   </property>
-  </action>
-  <action name="actionInitializeSkeleton">
-   <property name="text">
-    <string>Initialize Skeleton</string>
    </property>
   </action>
  </widget>

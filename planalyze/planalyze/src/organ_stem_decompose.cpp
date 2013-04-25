@@ -3,6 +3,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <boost/graph/kruskal_min_spanning_tree.hpp>
 
 #include <pcl/kdtree/kdtree_flann.h>
 
@@ -12,14 +13,15 @@
 #include "main_window.h"
 #include "osg_utility.h"
 #include "cgal_utility.h"
+#include "sketch_handler.h"
 #include "parameter_manager.h"
 #include "point_cloud.h"
 
-void PointCloud::sampleSkeletonPoints(boost::SkeletonGraph* stem_skeleton_graph)
+void PointCloud::sampleSkeletonPoints(void)
 {
   QMutexLocker locker(&mutex_);
 
-  boost::SkeletonGraph& stem_graph = *stem_skeleton_graph;
+  boost::SkeletonGraph& stem_graph = *(MainWindow::getInstance()->getSkeletonSketcher()->getSkeletonGraph());
   stem_graph.clear();
 
   std::vector<size_t> point_indices;
@@ -98,39 +100,111 @@ void PointCloud::sampleSkeletonPoints(boost::SkeletonGraph* stem_skeleton_graph)
   return;
 }
 
-struct CompareComponentBySize
+void PointCloud::initializeSkeleton(void)
 {
-  bool operator()(const std::vector<size_t>& a, const std::vector<size_t>& b)
+  QMutexLocker locker(&mutex_);
+
+  boost::SkeletonGraph& stem_graph = *(MainWindow::getInstance()->getSkeletonSketcher()->getSkeletonGraph());
+
+  // compute MST
+  pcl::PointCloud<PclPoint>::Ptr stem_skeleton(new pcl::PointCloud<PclPoint>());
+  for (size_t i = 0, i_end = boost::num_vertices(stem_graph); i < i_end; ++ i)
+    stem_skeleton->push_back(PclPoint(stem_graph[i]));
+  boost::shared_ptr<pcl::KdTreeFLANN<PclPoint> > kdtree(new pcl::KdTreeFLANN<PclPoint>(false));
+  kdtree->setInputCloud(stem_skeleton);
+
+  boost::PointGraph g_skeleton_mst(boost::num_vertices(stem_graph));
+  double distance_threshold_ = 2*ParameterManager::getInstance().getStemSkeletonRadius();
+  for (size_t i = 0, i_end = boost::num_vertices(stem_graph); i < i_end; ++ i)
   {
-    return a.size() > b.size();
+    std::vector<int> indices;
+    std::vector<float> distances;
+    int neighbor_num = kdtree->radiusSearch(stem_skeleton->at(i), distance_threshold_, indices, distances);
+    for (size_t j = 0; j < neighbor_num; ++ j)
+    {
+      WeightedEdge weighted_edge(std::sqrt(distances[j]));
+      boost::add_edge(i, indices[j], weighted_edge, g_skeleton_mst);
+    }
   }
-};
 
-void PointCloud::jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2)
-{
-  QMutexLocker locker(&mutex_);
+  typedef boost::PointGraphTraits::edge_descriptor edge_descriptor;
+  typedef boost::property_map<boost::PointGraph, double WeightedEdge::*>::type weight_map_type;
+  weight_map_type w_map = boost::get(&WeightedEdge::length, g_skeleton_mst);
 
+  std::vector<edge_descriptor> spanning_tree;
+  boost::kruskal_minimum_spanning_tree(g_skeleton_mst, std::back_inserter(spanning_tree), boost::weight_map(w_map));
+  for (size_t i = 0, i_end = spanning_tree.size(); i < i_end; ++ i)
+  {
+    size_t source = boost::source(spanning_tree[i], g_skeleton_mst);
+    size_t target = boost::target(spanning_tree[i], g_skeleton_mst);
+    const WeightedEdge& weighted_edge = g_skeleton_mst[spanning_tree[i]];
+    boost::add_edge(source, target, weighted_edge, stem_graph);
+  }
+
+  // filter MST by degree
+  for (size_t i = 0, i_end = boost::num_vertices(stem_graph); i < i_end; ++ i)
+  {
+    if (boost::degree(i, stem_graph) <= 2)
+      continue;
+    boost::clear_vertex(i, stem_graph);
+  }
+
+  // extract stems
+  typedef boost::SkeletonGraph::out_edge_iterator out_edge_iterator;
+
+  std::vector<bool> flags(boost::num_vertices(stem_graph), true);
+  std::vector<std::pair<std::vector<size_t>, double> > skeleton_components;
+  for (size_t i = 0, i_end = boost::num_vertices(stem_graph); i < i_end; ++ i)
+  {
+    if (boost::degree(i, stem_graph) != 1 || !flags[i])
+      continue;
+
+    skeleton_components.push_back(std::make_pair(std::vector<size_t>(), 0.0));
+    std::pair<std::vector<size_t>, double>& skeleton_component = skeleton_components.back();
+
+    flags[i] = false;
+    skeleton_component.first.push_back(i);
+    out_edge_iterator current_it = boost::out_edges(i, stem_graph).first;
+    do
+    {
+      size_t prev_id = boost::source(*current_it, stem_graph);
+      size_t this_id = boost::target(*current_it, stem_graph);
+      flags[this_id] = false;
+      skeleton_component.first.push_back(this_id);
+      skeleton_component.second += stem_graph[*current_it].length;
+
+      if (boost::degree(this_id, stem_graph) != 2)
+        break;
+
+      std::pair<out_edge_iterator, out_edge_iterator> out_edges = boost::out_edges(this_id, stem_graph);
+      out_edge_iterator it_0 = out_edges.first;
+      out_edge_iterator it_2 = ++ out_edges.first;
+      current_it = (prev_id == boost::target(*it_0, stem_graph))?(it_2):(it_0);
+    } while (true);
+  }
+
+  double stem_length_threshold = ParameterManager::getInstance().getStemSkeletonLength();
+  for (size_t i = 0, i_end = skeleton_components.size(); i < i_end; ++ i)
+  {
+    double length = skeleton_components[i].second;
+    if (length >= stem_length_threshold)
+      continue;
+
+    std::vector<size_t>& point_indices = skeleton_components[i].first;
+    for (size_t j = 0, j_end = point_indices.size()-1; j < j_end; ++ j)
+      boost::remove_edge(point_indices[j], point_indices[j+1], stem_graph);
+  }
 
   expire();
 
   return;
 }
 
-void PointCloud::breakSkeleton(osg::Vec3 point_1, osg::Vec3 point_2)
+void PointCloud::extractStemSkeleton(void)
 {
   QMutexLocker locker(&mutex_);
 
-
-  expire();
-
-  return;
-}
-
-void PointCloud::extractStemSkeleton(const boost::SkeletonGraph* stem_skeleton_graph)
-{
-  QMutexLocker locker(&mutex_);
-
-  const boost::SkeletonGraph& stem_graph = *stem_skeleton_graph;
+  boost::SkeletonGraph& stem_graph = *(MainWindow::getInstance()->getSkeletonSketcher()->getSkeletonGraph());
 
   // extract stems
   typedef boost::SkeletonGraph::out_edge_iterator out_edge_iterator;
@@ -187,7 +261,7 @@ void PointCloud::extractStemSkeleton(const boost::SkeletonGraph* stem_skeleton_g
   return;
 }
 
-void PointCloud::projectPointsToStems(void)
+void PointCloud::absoluteDetectStems(void)
 {
   return;
 }

@@ -98,9 +98,6 @@ public slots:
   void fSmoothLeaves(void);
   void bSmoothLeaves(void);
 
-  void absoluteClassify(void);
-  void absoluteDetectLeaves(void);
-
 signals:
   void progressValueChanged(int value);
   void timeToHideAndShowPointCloud(int hide_frame, int hide_view, int show_frame, int show_view);

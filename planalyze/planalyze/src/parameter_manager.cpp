@@ -217,11 +217,10 @@ bool ParameterManager::getStemSkeletonLength(double& stem_skeleton_length)
   return true;
 }
 
-bool ParameterManager::getTrackAndEvolveParameters(double& smooth_cost, int& frame)
+bool ParameterManager::getTrackAndEvolveParameters(double& smooth_cost)
 {
   ParameterDialog parameter_dialog("Track and Evolve Parameters", MainWindow::getInstance());
   parameter_dialog.addParameter(smooth_cost_);
-  parameter_dialog.addParameter(current_frame_);
 
   if (!parameter_dialog.exec() == QDialog::Accepted)
     return false;

@@ -1367,36 +1367,3 @@ void FileSystemModel::fSmoothLeaves(void)
 
   return;
 }
-
-void FileSystemModel::absoluteClassify(void)
-{
-  int frame;
-  double smooth_cost;
-  if (!ParameterManager::getInstance().getTrackAndEvolveParameters(smooth_cost, frame))
-    return;
-
-  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
-
-  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::absoluteClassify, smooth_cost));
-
-  return;
-}
-
-void FileSystemModel::absoluteDetectLeaves(void)
-{
-  int frame;
-  if (!ParameterManager::getInstance().getFrameParameter(frame))
-    return;
-
-  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
-
-  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::absoluteDetectLeaves));
-
-  return;
-}

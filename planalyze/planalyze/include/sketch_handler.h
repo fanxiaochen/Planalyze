@@ -26,16 +26,19 @@ public:
   virtual ~SkeletonSketcher(void);
 
   bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
+  boost::SkeletonGraph* getSkeletonGraph(void) {return skeleton_graph_;}
 
 public slots:
   void toggle(bool toggled);
-  void initializeSkeleton(void);
 
 protected:
   virtual void updateImpl(void);
 
   void addPoint(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
   void removeEdge(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
+
+  void jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
+  void breakSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
 
 private:
   osg::ref_ptr<osg::Vec3Array>  current_path_;

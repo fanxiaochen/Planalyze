@@ -131,20 +131,12 @@ void PointCloud::smoothLeaves(double smooth_cost, bool forward)
 
   osg::ref_ptr<PointCloud> p_ngbr = forward?getPrevFrame():getNextFrame();
   if (!p_ngbr.valid() || p_ngbr->getLeafNum() == 0)
-  {
-    locker.unlock();
-    absoluteDetectLeaves();
     return;
-  }
 
   size_t leaf_num_ngbr = p_ngbr->getLeafNum();
   std::vector<Organ>& leaves_prev = p_ngbr->getLeaves();
   if (leaf_num_ngbr < 2)
-  {
-    locker.unlock();
-    absoluteDetectLeaves();
     return;
-  }
 
   std::cout << "frame: " << getFrame() << "\tsmoothing leaves" << (forward?("forward"):("backward")) << "..." << std::endl;
 
