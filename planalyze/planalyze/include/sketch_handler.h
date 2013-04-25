@@ -38,6 +38,7 @@ protected:
 
 private:
   osg::ref_ptr<osg::Vec3Array>  current_path_;
+  osg::ref_ptr<osg::Vec3Array>  center_points_;
 };
 
 class SketchHandler : public osgGA::GUIEventHandler

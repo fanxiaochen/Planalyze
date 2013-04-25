@@ -40,12 +40,9 @@ namespace osg
 
 struct WeightedEdge
 {
-  WeightedEdge()
-    :geodesic_distance(0), heat_kernel_distance(0){}
-  WeightedEdge(double geodesic, double heat_kernel)
-    :geodesic_distance(geodesic), heat_kernel_distance(heat_kernel){}
-  double geodesic_distance;
-  double heat_kernel_distance;
+  WeightedEdge():length(0){}
+  WeightedEdge(double len):length(len){}
+  double length;
 };
 
 namespace boost

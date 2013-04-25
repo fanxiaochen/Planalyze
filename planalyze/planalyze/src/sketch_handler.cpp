@@ -40,7 +40,8 @@ static osg::Vec3 computeIntersection(osgViewer::View* view, const osgGA::GUIEven
 }
 
 SkeletonSketcher::SkeletonSketcher(void)
-  :current_path_(new osg::Vec3Array)
+  :current_path_(new osg::Vec3Array),
+  center_points_(new osg::Vec3Array)
 {
   hidden_ = true;
 }
@@ -63,6 +64,8 @@ void SkeletonSketcher::updateImpl(void)
 {
   osg::Vec4 joint_color = osg::Vec4(0.8f, 0.8f, 0.8f, 1.0f);
   double joint_radius = 0.5;
+  for (size_t i = 0, i_end = center_points_->size(); i < i_end; ++ i)
+    addChild(OSGUtility::drawSphere(center_points_->at(i), joint_radius, joint_color));
 
   osg::Vec4 current_color = osg::Vec4(0.8f, 0.2f, 0.2f, 1.0f);
   double current_radius = 0.8;
@@ -129,7 +132,7 @@ void SkeletonSketcher::removeEdge(osgViewer::View* view, const osgGA::GUIEventAd
   if (current_path_->size() == 2)
   {
     osg::ref_ptr<PointCloud> point_cloud = MainWindow::getInstance()->getFileSystemModel()->getDisplayFirstFrame();
-    point_cloud->deleteSkeleton(current_path_->at(0), current_path_->at(1));
+    point_cloud->breakSkeleton(current_path_->at(0), current_path_->at(1));
 
     current_path_->clear();
   }

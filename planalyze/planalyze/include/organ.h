@@ -40,11 +40,10 @@ public:
   double getFlatness(void) const {return flatness_;}
   void setFlatness(double flatness) {flatness_ = flatness;}
 
-  double getThickness(void) const {return thickness_;}
-  void setThickness(double thickness) {thickness_ = thickness;}
-
   CgalVector getOrientation(void) const {return orientation_;}
   void setOrientation(CgalVector orientation) {orientation_ = orientation;}
+
+  void setSkeleton(const std::vector<CgalPoint>& skeleton) {skeleton_ = skeleton;}
   std::vector<CgalPoint>& getSkeleton(void) {return skeleton_;}
   double distance(const CgalPoint& point);
   double distance(const Organ& organ);
@@ -56,7 +55,6 @@ private:
   std::vector<CgalPoint> getPoints(void) const;
 
   void updateFlatnessFeature(void);
-  void updateThicknessFeature(void);
   void updateOrientationFeature(void);
 
 private:
@@ -67,7 +65,6 @@ private:
 
   // for leaf
   double                      flatness_;
-  double                      thickness_;
 
   // for stem
   CgalVector                  orientation_;

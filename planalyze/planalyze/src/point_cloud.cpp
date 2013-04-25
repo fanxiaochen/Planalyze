@@ -61,10 +61,8 @@ PointCloud::PointCloud(void)
   show_stems_(MainWindow::getInstance()->getUI().actionRenderStems->isChecked()),
   show_triangles_(MainWindow::getInstance()->getUI().actionRenderTriangles->isChecked()),
   show_organs_(MainWindow::getInstance()->getUI().actionRenderOrgans->isChecked()),
-  show_stem_graph_(MainWindow::getInstance()->getUI().actionRenderStemGraph->isChecked()),
   triangulation_(new CGAL::Delaunay()),
   point_graph_(new boost::PointGraph()),
-  stem_skeleton_graph_(new boost::SkeletonGraph()),
   point_graph_threshold_(-1.0),
   kdtree_(new pcl::KdTreeFLANN<PclRichPoint>()),
   plant_points_num_(0),
@@ -94,7 +92,6 @@ PointCloud::~PointCloud(void)
 
   delete triangulation_;
   delete point_graph_;
-  delete stem_skeleton_graph_;
 }
 
 void PointCloud::setRegisterState(bool registered)
@@ -419,9 +416,6 @@ void PointCloud::updateImpl()
   if (show_organs_)
     visualizeOrgans();
 
-  if (show_stem_graph_)
-    visualizeStemGraph();
-
   if (show_draggers_)
   {
     osg::BoundingSphere boundingSphere = getBound();
@@ -711,49 +705,6 @@ void PointCloud::povray(SlavePovRayVisitor* povray_visitor) const
     }
   }
 
-  if (show_stem_graph_)
-  {
-    boost::SkeletonGraph& g_stem_skeleton = *stem_skeleton_graph_;
-    osg::Vec4 node_color = osg::Vec4(0.55f, 0.40f, 0.03f, 1.0f);
-    osg::Vec4 edge_color = osg::Vec4(0.85f, 0.65f, 0.13f, 1.0f);
-
-    const QString& stem_skeleton_node_radius = povray_visitor->getNamedFloatIdentifier("stem_skeleton_node_radius", 0.3);
-    for (size_t i = 0, i_end = boost::num_vertices(g_stem_skeleton); i < i_end; ++ i)
-    {
-      osg::Vec4 color = node_color;
-      if (boost::degree(i, g_stem_skeleton) != 0)
-      {
-        int id = -g_stem_skeleton[*boost::out_edges(i, g_stem_skeleton).first].heat_kernel_distance;
-        if (id > 0)
-        {
-          id --;
-          color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, 2*id);
-        }
-      }
-      povray_visitor->drawSphere(Caster<osg::Vec3, CgalPoint>(g_stem_skeleton[i]),
-        stem_skeleton_node_radius, color);
-    }
-
-
-    const QString& stem_skeleton_edge_radius = povray_visitor->getNamedFloatIdentifier("stem_skeleton_edge_radius", 0.15);
-    typedef boost::SkeletonGraphTraits::edge_iterator edge_iterator_skeleton;
-    std::pair<edge_iterator_skeleton, edge_iterator_skeleton> edges_skeleton = boost::edges(g_stem_skeleton);
-    for (edge_iterator_skeleton it = edges_skeleton.first; it != edges_skeleton.second; ++ it)
-    {
-      osg::Vec4 color = edge_color;
-      const osg::Vec3& source = g_stem_skeleton[boost::source(*it, g_stem_skeleton)];
-      const osg::Vec3& target = g_stem_skeleton[boost::target(*it, g_stem_skeleton)];
-      int id = -g_stem_skeleton[*it].heat_kernel_distance;
-      if (id > 0)
-      {
-        id --;
-        color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, 2*id);
-      }
-      povray_visitor->drawCylinder(Caster<osg::Vec3, CgalPoint>(source), Caster<osg::Vec3, CgalPoint>(target),
-        stem_skeleton_edge_radius, color);
-    }
-  }
-
   return;
 }
 
@@ -1028,15 +979,6 @@ void PointCloud::toggleRenderOrgans(void)
 {
   QMutexLocker locker(&mutex_);
   show_organs_ = !show_organs_;
-  expire();
-
-  return;
-}
-
-void PointCloud::toggleRenderStemGraph(void)
-{
-  QMutexLocker locker(&mutex_);
-  show_stem_graph_ = !show_stem_graph_;
   expire();
 
   return;
@@ -1461,15 +1403,14 @@ void PointCloud::initPointGraph(double distance_threshold)
     const CGAL::Delaunay::Cell_handle& cell_handle  = it->first;
     const CGAL::Delaunay::Vertex_handle& source_handle = cell_handle->vertex(it->second);
     const CGAL::Delaunay::Vertex_handle& target_handle = cell_handle->vertex(it->third);
-    double distance_L2 = CGAL::squared_distance(source_handle->point(), target_handle->point());
-    double distance_L1 = std::sqrt(distance_L2);
+    double distance_L1 = std::sqrt(CGAL::squared_distance(source_handle->point(), target_handle->point()));
     if (distance_L1 > point_graph_threshold_)
       continue;
 
     size_t source_id = source_handle->info();
     size_t target_id = target_handle->info();
     assert (source_id < plant_points_num_ && target_id < plant_points_num_);
-    WeightedEdge weighted_edge(distance_L1, std::exp(-distance_L2/t));
+    WeightedEdge weighted_edge(distance_L1);
     boost::add_edge(source_id, target_id, weighted_edge, g_point);
   }
 
@@ -1743,17 +1684,6 @@ void PointCloud::setRenderOrgans(bool render)
 
   QMutexLocker locker(&mutex_);
   show_organs_ = render;
-  expire();
-  return;
-}
-
-void PointCloud::setRenderStemGraph(bool render)
-{
-  if (show_stem_graph_ == render)
-    return;
-
-  QMutexLocker locker(&mutex_);
-  show_stem_graph_ = render;
   expire();
   return;
 }

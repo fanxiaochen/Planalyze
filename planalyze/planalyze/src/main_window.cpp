@@ -246,9 +246,6 @@ void MainWindow::init(void)
   connect(ui_.actionBSmoothLeaves, SIGNAL(triggered()), file_system_model, SLOT(bSmoothLeaves()));
   connect(ui_.actionAbsoluteClassify, SIGNAL(triggered()), file_system_model, SLOT(absoluteClassify()));
   connect(ui_.actionDecomposeLeaves, SIGNAL(triggered()), file_system_model, SLOT(absoluteDetectLeaves()));
-  connect(ui_.actionComputeSkeleton, SIGNAL(triggered()), file_system_model, SLOT(computeStemSkeleton()));
-  connect(ui_.actionInitializeSkeleton, SIGNAL(triggered()), file_system_model, SLOT(initializeStemSkeleton()));
-  connect(ui_.actionDecomposeStems, SIGNAL(triggered()), file_system_model, SLOT(absoluteDetectStems()));
 
   //rendering menu
   connect(ui_.actionIncreasePointSize, SIGNAL(triggered()), osg_viewer_widget_, SLOT(increasePointSize()));
@@ -265,7 +262,6 @@ void MainWindow::init(void)
   connect(ui_.actionRenderStems, SIGNAL(toggled(bool)), file_system_model, SLOT(setRenderStems(bool)));
   connect(ui_.actionRenderTriangles, SIGNAL(toggled(bool)), file_system_model, SLOT(setRenderTriangles(bool)));
   connect(ui_.actionRenderOrgans, SIGNAL(toggled(bool)), file_system_model, SLOT(setRenderOrgans(bool)));
-  connect(ui_.actionRenderStemGraph, SIGNAL(toggled(bool)), file_system_model, SLOT(setRenderStemGraph(bool)));
   connect(color_mode_, SIGNAL(currentIndexChanged(int)), file_system_model, SLOT(setColorMode(int)));
 
   //batch menu

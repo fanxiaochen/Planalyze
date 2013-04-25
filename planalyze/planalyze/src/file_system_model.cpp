@@ -847,14 +847,6 @@ void FileSystemModel::setRenderOrgans(bool render)
   return;
 }
 
-void FileSystemModel::setRenderStemGraph(bool render)
-{
-  for (PointCloudCacheMap::iterator it = point_cloud_cache_map_.begin(); it != point_cloud_cache_map_.end(); ++ it)
-    it->second->setRenderStemGraph(render);
-
-  return;
-}
-
 void FileSystemModel::setColorMode(int color_mode)
 {
   if (color_mode == PointCloud::UNIFORM)
@@ -1405,54 +1397,6 @@ void FileSystemModel::absoluteDetectLeaves(void)
   connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
 
   watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::absoluteDetectLeaves));
-
-  return;
-}
-
-void FileSystemModel::absoluteDetectStems(void)
-{
-  int frame;
-  if (!ParameterManager::getInstance().getFrameParameter(frame))
-    return;
-
-  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
-
-  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::absoluteDetectStems));
-
-  return;
-}
-
-void FileSystemModel::computeStemSkeleton(void)
-{
-  int frame;
-  if (!ParameterManager::getInstance().getFrameParameter(frame))
-    return;
-
-  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
-
-  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::computeStemSkeleton));
-
-  return;
-}
-
-void FileSystemModel::initializeStemSkeleton(void)
-{
-  int frame;
-  if (!ParameterManager::getInstance().getFrameParameter(frame))
-    return;
-
-  osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
-
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, SIGNAL(finished()), point_cloud, SLOT(printOrgans()));
-
-  watcher->setFuture(QtConcurrent::run(point_cloud.get(), &PointCloud::initializeStemSkeleton));
 
   return;
 }

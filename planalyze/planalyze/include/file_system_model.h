@@ -86,7 +86,6 @@ public slots:
   void setRenderLeaves(bool render);
   void setRenderTriangles(bool render);
   void setRenderOrgans(bool render);
-  void setRenderStemGraph(bool render);
   void setColorMode(int color_mode);
 
   void showPointCloud(int frame, int view);
@@ -101,9 +100,6 @@ public slots:
 
   void absoluteClassify(void);
   void absoluteDetectLeaves(void);
-  void computeStemSkeleton(void);
-  void initializeStemSkeleton(void);
-  void absoluteDetectStems(void);
 
 signals:
   void progressValueChanged(int value);

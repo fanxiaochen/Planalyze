@@ -102,23 +102,12 @@ void PointCloud::smoothStems(double smooth_cost, bool forward)
 
   osg::ref_ptr<PointCloud> p_ngbr = forward?getPrevFrame():getNextFrame();
   if (!p_ngbr.valid() || p_ngbr->getStemNum() == 0)
-  {
-    locker.unlock();
-    absoluteDetectStems();
-
     return;
-  }
 
   size_t stem_num_ngbr = p_ngbr->getStemNum();
   std::vector<Organ>& stems_ngbr = p_ngbr->getStems();
-
   if (stem_num_ngbr < 2)
-  {
-    locker.unlock();
-    absoluteDetectStems();
-
     return;
-  }
 
   double power = 2.0;
   int cost_scale = 50;

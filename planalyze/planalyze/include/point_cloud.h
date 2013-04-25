@@ -77,7 +77,6 @@ public:
   void setRenderStems(bool render);
   void setRenderTriangles(bool render);
   void setRenderOrgans(bool render);
-  void setRenderStemGraph(bool render);
 
   void registration(int segment_threshold, int max_iterations, double max_distance);
   void extractPlant(int segment_threshold, double triangle_length);
@@ -143,7 +142,7 @@ public:
   void trimOrgans(bool is_leaf);
 
   void jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
-  void deleteSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
+  void breakSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
 
 public slots:
   void setRotation(void);
@@ -168,7 +167,6 @@ public slots:
   void toggleRenderLeaves(void);
   void toggleRenderTriangles(void);
   void toggleRenderOrgans(void);
-  void toggleRenderStemGraph(void);
   void toggleRegisterState(void);
 
   void loadStatus(void);
@@ -177,9 +175,9 @@ public slots:
 
   void absoluteClassify(double smooth_cost);
   void absoluteDetectLeaves(void);
-  void computeStemSkeleton(void);
-  void initializeStemSkeleton(void);
-  void absoluteDetectStems(void);
+
+  void sampleSkeletonPoints(osg::Vec3Array* center_points);
+  void initializeStemSkeleton(const osg::Vec3Array* center_points);
   void printOrgans(void);
 
 protected:
@@ -204,11 +202,6 @@ protected:
   void triangulate(void) const;
   void initPointGraph(double distance_threshold);
   void denoise(int segment_threshold, double triangle_length);
-
-  void sampleSkeletonPoints(void);
-  void centerSkeletonPoints(void);
-  void computeStemSkeletonMST(void);
-  void filterStemSkeletonByDegree(void);
 
   void initGcoGraphEdges(GCoptimizationGeneralGraph* gco, int smooth_cost);
   void initGcoGraphEdgesStems(GCoptimizationGeneralGraph* gco, int smooth_cost, const std::vector<size_t>& reverse_indices);
@@ -247,7 +240,6 @@ protected:
   std::vector<Organ>              stems_;
   std::vector<Organ>              leaves_;
   boost::PointGraph*              point_graph_;
-  boost::SkeletonGraph*           stem_skeleton_graph_;
 
   KdTreePtr                       kdtree_;
 
@@ -273,7 +265,6 @@ private:
   bool                            show_orientations_;
   bool                            show_triangles_;
   bool                            show_organs_;
-  bool                            show_stem_graph_;
 };
 
 #endif // POINTCLOUD_H

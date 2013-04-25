@@ -43,7 +43,6 @@ Organ::Organ(PointCloud* point_cloud, QDomElement* element)
   id_ = element->attribute("Id", "").toUInt();
   is_leaf_ = bool(element->attribute("IsLeaf", "").toInt());
   flatness_ = element->attribute("flatness", "").toDouble();
-  thickness_ = element->attribute("thickness", "").toDouble();
   double ox = element->attribute("OrientationX", "").toDouble();
   double oy = element->attribute("OrientationY", "").toDouble();
   double oz = element->attribute("OrientationZ", "").toDouble();
@@ -67,7 +66,6 @@ Organ::Organ(PointCloud* point_cloud, const Organ& organ)
   id_ = organ.id_;
   is_leaf_ = organ.is_leaf_;
   flatness_ = organ.flatness_;
-  thickness_ = organ.thickness_;
   orientation_ = organ.orientation_;
   skeleton_ = organ.skeleton_;
 
@@ -83,7 +81,6 @@ void Organ::save(QDomDocument* doc, QDomElement* element)
   element->setAttribute("Id", id_);
   element->setAttribute("IsLeaf", (int)(is_leaf_));
   element->setAttribute("flatness", flatness_);
-  element->setAttribute("thickness", thickness_);
   element->setAttribute("OrientationX", orientation_.x());
   element->setAttribute("OrientationY", orientation_.y());
   element->setAttribute("OrientationZ", orientation_.z());
@@ -173,17 +170,6 @@ void Organ::updateFlatnessFeature(void)
   }
 
   flatness_ /= point_indices_.size();
-
-  return;
-}
-
-void Organ::updateThicknessFeature(void)
-{
-  thickness_ = 0;
-  for (size_t i = 0, i_end = point_indices_.size(); i < i_end; ++ i)
-    thickness_ += point_cloud_->at(point_indices_[i]).thickness;
-
-  thickness_ /= point_indices_.size();
 
   return;
 }
@@ -279,7 +265,6 @@ void Organ::updateFeature(void)
   }
 
   updateFlatnessFeature();
-  updateThicknessFeature();
   updateOrientationFeature();
 
   return;

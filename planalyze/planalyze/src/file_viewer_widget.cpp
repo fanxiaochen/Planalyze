@@ -46,14 +46,6 @@ void FileViewerWidget::contextMenuEvent(QContextMenuEvent *event)
 
   if (view != 12)
     menu.addAction("Set Cloud Rotation", point_cloud, SLOT(setRotation()));
-  else
-  {
-    QMenu* skeleton_menu = menu.addMenu("Stem Skeleton");
-    skeleton_menu->addAction("Sample Points", point_cloud, SLOT(sampleSkeletonPoints()));
-    skeleton_menu->addAction("Centralize Points", point_cloud, SLOT(centerSkeletonPoints()));
-    skeleton_menu->addAction("Compute Stem MST", point_cloud, SLOT(computeStemSkeletonMST()));
-    skeleton_menu->addAction("Filter By Degree", point_cloud, SLOT(filterStemSkeletonByDegree()));
-  }
 
   QMenu* colorize_menu = menu.addMenu("Colorize Point Cloud");
   colorize_menu->addAction("Original Color", point_cloud, SLOT(setOriginalColor()));
@@ -78,7 +70,6 @@ void FileViewerWidget::contextMenuEvent(QContextMenuEvent *event)
   {
     rendering_menu->addAction("Inner Surface", point_cloud, SLOT(toggleRenderTriangles()));
     rendering_menu->addAction("Primitive Nodes", point_cloud, SLOT(toggleRenderOrgans()));
-    rendering_menu->addAction("Segment Graph", point_cloud, SLOT(toggleRenderStemGraph()));
   }
 
   if (view != 12)

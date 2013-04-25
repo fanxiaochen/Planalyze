@@ -89,7 +89,6 @@
     <addaction name="actionRenderTriangles"/>
     <addaction name="separator"/>
     <addaction name="actionRenderOrgans"/>
-    <addaction name="actionRenderStemGraph"/>
     <addaction name="separator"/>
     <addaction name="actionForceCenterScene"/>
     <addaction name="separator"/>
@@ -149,9 +148,6 @@
     <addaction name="separator"/>
     <addaction name="actionAbsoluteClassify"/>
     <addaction name="actionDecomposeLeaves"/>
-    <addaction name="actionComputeSkeleton"/>
-    <addaction name="actionInitializeSkeleton"/>
-    <addaction name="actionDecomposeStems"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuCapture">
@@ -191,8 +187,6 @@
    <addaction name="actionRenderTriangles"/>
    <addaction name="separator"/>
    <addaction name="actionRenderOrgans"/>
-   <addaction name="actionRenderStemGraph"/>
-   <addaction name="separator"/>
    <addaction name="separator"/>
    <addaction name="actionEnableInformation"/>
   </widget>
@@ -324,17 +318,6 @@
    </property>
    <property name="text">
     <string>Triangles</string>
-   </property>
-  </action>
-  <action name="actionRenderStemGraph">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Stem Graph</string>
    </property>
   </action>
   <action name="actionRenderOrgans">
@@ -553,11 +536,6 @@
     <string>Decompose Leaves</string>
    </property>
   </action>
-  <action name="actionDecomposeStems">
-   <property name="text">
-    <string>Decompose Stems</string>
-   </property>
-  </action>
   <action name="actionAbsoluteClassify">
    <property name="text">
     <string>Absolute Classify</string>
@@ -591,16 +569,6 @@
   <action name="actionReverseFrames">
    <property name="text">
     <string>Reverse Frames</string>
-   </property>
-  </action>
-  <action name="actionComputeSkeleton">
-   <property name="text">
-    <string>Compute Skeleton</string>
-   </property>
-  </action>
-  <action name="actionInitializeSkeleton">
-   <property name="text">
-    <string>Initialize Skeleton</string>
    </property>
   </action>
  </widget>
