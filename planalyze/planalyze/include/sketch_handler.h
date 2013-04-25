@@ -29,6 +29,7 @@ public:
 
 public slots:
   void toggle(bool toggled);
+  void initializeSkeleton(void);
 
 protected:
   virtual void updateImpl(void);
@@ -38,7 +39,7 @@ protected:
 
 private:
   osg::ref_ptr<osg::Vec3Array>  current_path_;
-  osg::ref_ptr<osg::Vec3Array>  center_points_;
+  boost::SkeletonGraph*         skeleton_graph_;
 };
 
 class SketchHandler : public osgGA::GUIEventHandler
@@ -52,7 +53,5 @@ public:
 private:
   osg::ref_ptr<Sketcher>  sketcher_;
 };
-
-
 
 #endif // sketch_handler_H

@@ -176,8 +176,9 @@ public slots:
   void absoluteClassify(double smooth_cost);
   void absoluteDetectLeaves(void);
 
-  void sampleSkeletonPoints(osg::Vec3Array* center_points);
-  void initializeStemSkeleton(const osg::Vec3Array* center_points);
+  void sampleSkeletonPoints(boost::SkeletonGraph* stem_skeleton_graph);
+  void extractStemSkeleton(const boost::SkeletonGraph* stem_skeleton_graph);
+  void projectPointsToStems(void);
   void printOrgans(void);
 
 protected:

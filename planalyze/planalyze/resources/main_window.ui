@@ -148,6 +148,7 @@
     <addaction name="separator"/>
     <addaction name="actionAbsoluteClassify"/>
     <addaction name="actionDecomposeLeaves"/>
+    <addaction name="actionInitializeSkeleton"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuCapture">
@@ -569,6 +570,11 @@
   <action name="actionReverseFrames">
    <property name="text">
     <string>Reverse Frames</string>
+   </property>
+  </action>
+  <action name="actionInitializeSkeleton">
+   <property name="text">
+    <string>Initialize Skeleton</string>
    </property>
   </action>
  </widget>
