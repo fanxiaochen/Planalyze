@@ -23,36 +23,10 @@ void PointCloud::fillOrganPoints(void)
     if (organ_id == PclRichPoint::ID_UNINITIALIZED)
       continue;
 
-    if (at(i).label == PclRichPoint::LABEL_LEAF)
-      leaf_num = std::max(leaf_num, organ_id+1);
-    if (at(i).label == PclRichPoint::LABEL_STEM)
-      stem_num = std::max(stem_num, organ_id+1);
-  }
-
-  if (stems_.size() != stem_num)
-  {
-    stems_.clear();
-    for (size_t i = 0; i < stem_num; ++ i)
-      stems_.push_back(Organ(this, i, false));
-  }
-
-  if (leaves_.size() != leaf_num)
-  {
-    leaves_.clear();
-    for (size_t i = 0; i < leaf_num; ++ i)
-      leaves_.push_back(Organ(this, i, true));
-  }
-
-  for (size_t i = 0; i < plant_points_num_; ++ i)
-  {
-    int organ_id = at(i).organ_id;
-    if (organ_id == PclRichPoint::ID_UNINITIALIZED)
-      continue;
-
     int label = at(i).label;
-    if (label == PclRichPoint::LABEL_LEAF)
+    if (label == PclRichPoint::LABEL_LEAF && organ_id < leaves_.size())
       leaves_[organ_id].addPoint(i);
-    else if (label == PclRichPoint::LABEL_STEM)
+    else if (label == PclRichPoint::LABEL_STEM && organ_id < stems_.size())
       stems_[organ_id].addPoint(i);
   }
 

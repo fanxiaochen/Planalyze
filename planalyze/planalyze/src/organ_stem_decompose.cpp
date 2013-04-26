@@ -95,7 +95,7 @@ void PointCloud::sampleSkeletonPoints(void)
       stem_skeleton->at(i) = PclPoint(stem_graph[i]);
   }
 
-  expire();
+  MainWindow::getInstance()->getSkeletonSketcher()->expire();
 
   return;
 }
@@ -195,7 +195,7 @@ void PointCloud::initializeSkeleton(void)
       boost::remove_edge(point_indices[j], point_indices[j+1], stem_graph);
   }
 
-  expire();
+  MainWindow::getInstance()->getSkeletonSketcher()->expire();
 
   return;
 }
@@ -263,5 +263,34 @@ void PointCloud::extractStemSkeleton(void)
 
 void PointCloud::absoluteDetectStems(void)
 {
+  QMutexLocker locker(&mutex_);
+
+  for (size_t i = 0; i < plant_points_num_; ++ i)
+  {
+    if (at(i).label == PclRichPoint::LABEL_LEAF)
+      continue;
+
+    double min_distance = std::numeric_limits<double>::max();
+    size_t min_organ = 0;
+    for (size_t j = 0, j_end = stems_.size(); j < j_end; ++ j)
+    {
+      double distance = stems_[j].distance(at(i).cast<CgalPoint>());
+      if (distance < min_distance)
+      {
+        min_distance = distance;
+        min_organ = j;
+      }
+    }
+    stems_[min_organ].addPoint(i);
+  }
+
+  locker.unlock();
+  trimOrgans(false);
+  locker.relock();
+
+  updateOrganIdAndFeature();
+
+  expire();
+
   return;
 }
