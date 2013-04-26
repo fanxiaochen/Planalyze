@@ -323,50 +323,9 @@ double Organ::distance(const Organ& organ)
 double Organ::computeArea(void)
 {
   double volume = 0;
-
-  const CGAL::Delaunay* triangulation = point_cloud_->getTriangulation();
-
-  std::unordered_set<int> point_indices(point_indices_.begin(), point_indices_.end());
-
-  double triangle_length = ParameterManager::getInstance().getTriangleLength();
-  double triangle_length_threshold = triangle_length*triangle_length;
-  for (CGAL::Delaunay::Finite_cells_iterator it = triangulation->finite_cells_begin();
-    it != triangulation->finite_cells_end(); ++ it)
+  if (!is_leaf_)
   {
-    bool volume_of_this_organ = true;
-    for (size_t i = 0; i < 4; ++ i)
-    {
-      if (point_indices.find(it->vertex(i)->info()) == point_indices.end())
-      {
-        volume_of_this_organ = false;
-        break;
-      }
-    }
-
-    if (!volume_of_this_organ)
-      continue;
-
-    bool large_tetrahedron = false;
-    for (size_t i = 0; i < 4; ++ i)
-    {
-      for (size_t j = i+1; j < 4; ++ j)
-      {
-        const CGAL::Delaunay::Point& source = it->vertex(i)->point();
-        const CGAL::Delaunay::Point& target = it->vertex(j)->point();
-        if (CGAL::squared_distance(source, target) > triangle_length_threshold)
-        {
-          large_tetrahedron = true;
-          break;
-        }
-      }
-      if (large_tetrahedron)
-        break;
-    }
-
-    if (large_tetrahedron)
-      continue;
-
-    volume += std::abs(CGAL::volume(it->vertex(0)->point(), it->vertex(1)->point(), it->vertex(2)->point(), it->vertex(3)->point()));
+    volume = std::sqrt(CGAL::squared_distance(skeleton_.front(), skeleton_.back()));
   }
 
   return volume;
