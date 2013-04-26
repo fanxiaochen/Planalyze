@@ -51,6 +51,7 @@ public:
   Registrator* getRegistrator(void) {return registrator_;}
   Information* getInformation(void) {return information_;}
   PovRayVisitor* getPovrayVisitorMaster(void){return master_;}
+  SkeletonSketcher* getSkeletonSketcher(void) {return skeleton_sketcher_;}
   std::map<size_t, size_t>& getFrameFrequency(void){return frame_frequency_;}
 
   void updateStatusMessage(const QString& message);

@@ -141,9 +141,6 @@ public:
 
   void trimOrgans(bool is_leaf);
 
-  void jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
-  void breakSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
-
 public slots:
   void setRotation(void);
   void registration(void);
@@ -173,12 +170,14 @@ public slots:
   void saveStatus(void);
   void save(void);
 
-  void absoluteClassify(double smooth_cost);
+  void absoluteClassify(void);
   void absoluteDetectLeaves(void);
 
-  void sampleSkeletonPoints(boost::SkeletonGraph* stem_skeleton_graph);
-  void extractStemSkeleton(const boost::SkeletonGraph* stem_skeleton_graph);
-  void projectPointsToStems(void);
+  void sampleSkeletonPoints(void);
+  void initializeSkeleton(void);
+  void extractStemSkeleton(void);
+  void absoluteDetectStems(void);
+
   void printOrgans(void);
 
 protected:

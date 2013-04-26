@@ -36,7 +36,7 @@ public:
   bool getFrameParameter(int& frame);
   bool getFrameParameters(int& start_frame, int& end_frame, int& downsampling);
 
-  bool getTrackAndEvolveParameters(double& smooth_cost, int& frame);
+  bool getTrackAndEvolveParameters(double& smooth_cost);
   bool getTrackAndEvolveParameters(double& smooth_cost, int& start_frame, int& end_frame, bool with_frames=true);
 
   double getStemSkeletonRadius(void) const;

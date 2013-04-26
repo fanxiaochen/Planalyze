@@ -110,10 +110,7 @@ void PointCloud::classifyLeafStem(double smooth_cost, bool forward)
 
   if (!point_cloud_reference.valid() || 
     (point_cloud_reference->getStemNum() == 0 && point_cloud_reference->getLeafNum() == 0))
-  {
-    absoluteClassify(smooth_cost);
     return;
-  }
 
   std::cout << "frame: " << getFrame() << "\tclassifying " << (forward?("forward"):("backward")) << "..." << std::endl;
 
@@ -203,8 +200,12 @@ void PointCloud::classifyLeafStem(double smooth_cost, bool forward)
   return;
 }
 
-void PointCloud::absoluteClassify(double smooth_cost)
+void PointCloud::absoluteClassify(void)
 {
+  double smooth_cost;
+  if (!ParameterManager::getInstance().getTrackAndEvolveParameters(smooth_cost))
+    return;
+
   std::cout << "frame: " << getFrame() << "\tabs classifying ..." << std::endl;
 
   double power = 2.0;

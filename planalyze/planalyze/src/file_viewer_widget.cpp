@@ -46,6 +46,16 @@ void FileViewerWidget::contextMenuEvent(QContextMenuEvent *event)
 
   if (view != 12)
     menu.addAction("Set Cloud Rotation", point_cloud, SLOT(setRotation()));
+  else
+  {
+    QMenu* stem_menu = menu.addMenu("Initialization");
+    stem_menu->addAction("Leaf-Stem Classify", point_cloud, SLOT(absoluteClassify()));
+    stem_menu->addAction("Decompose Leaves", point_cloud, SLOT(absoluteDetectLeaves()));
+    stem_menu->addAction("Sample Skeleton Points", point_cloud, SLOT(sampleSkeletonPoints()));
+    stem_menu->addAction("Initialize Skeleton", point_cloud, SLOT(initializeSkeleton()));
+    stem_menu->addAction("Extract Stem Skeleton", point_cloud, SLOT(extractStemSkeleton()));
+    stem_menu->addAction("Decompose Stems", point_cloud, SLOT(absoluteDetectStems()));
+  }
 
   QMenu* colorize_menu = menu.addMenu("Colorize Point Cloud");
   colorize_menu->addAction("Original Color", point_cloud, SLOT(setOriginalColor()));

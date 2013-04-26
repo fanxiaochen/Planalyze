@@ -244,9 +244,6 @@ void MainWindow::init(void)
   connect(ui_.actionBSmoothStems, SIGNAL(triggered()), file_system_model, SLOT(bSmoothStems()));
   connect(ui_.actionFSmoothLeaves, SIGNAL(triggered()), file_system_model, SLOT(fSmoothLeaves()));
   connect(ui_.actionBSmoothLeaves, SIGNAL(triggered()), file_system_model, SLOT(bSmoothLeaves()));
-  connect(ui_.actionAbsoluteClassify, SIGNAL(triggered()), file_system_model, SLOT(absoluteClassify()));
-  connect(ui_.actionDecomposeLeaves, SIGNAL(triggered()), file_system_model, SLOT(absoluteDetectLeaves()));
-  connect(ui_.actionInitializeSkeleton, SIGNAL(triggered()), skeleton_sketcher_, SLOT(initializeSkeleton()));
 
   //rendering menu
   connect(ui_.actionIncreasePointSize, SIGNAL(triggered()), osg_viewer_widget_, SLOT(increasePointSize()));
