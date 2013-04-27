@@ -117,23 +117,20 @@ private:
   QStringList                     recent_workspaces_;
   QAction*                        action_recent_workspaces_[MaxRecentWorkspaces];
 
-  TurnTable               *turn_table_;
-  ImageViewer             *image_viewer_;
-  ImageGrabber            *image_grabber_;
-  PlainTextViewer         *plain_text_viewer_;
-  PatternProjector        *pattern_projector_;
-
-  int                     current_frame_;
-  int                     current_view_;
-
-  int                     frame_timer_id_;
-  int                     view_timer_id_;
-
-  IntParameter            frame_time_;
-  IntParameter            start_frame_;
-  DoubleParameter            view_time_;
-
-  QThread                 grabber_thread_;
+  // for capture
+  TurnTable*                      turn_table_;
+  ImageViewer*                    image_viewer_;
+  ImageGrabber*                   image_grabber_;
+  PlainTextViewer*                plain_text_viewer_;
+  PatternProjector*               pattern_projector_;
+  int                             current_frame_;
+  int                             current_view_;
+  int                             frame_timer_id_;
+  int                             view_timer_id_;
+  IntParameter                    frame_time_;
+  IntParameter                    start_frame_;
+  DoubleParameter                 view_time_;
+  QThread                         grabber_thread_;
 };
 
 class MainWindowInstancer

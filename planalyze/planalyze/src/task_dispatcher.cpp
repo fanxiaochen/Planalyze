@@ -1303,7 +1303,7 @@ void TaskDispatcher::dispatchTaskExtractPoints(void)
 
   int start_frame, end_frame;
   int downsampling;
-  if (!ParameterManager::getInstance().getFrameParameters(start_frame, end_frame, downsampling))
+  if (!ParameterManager::getInstance().getDownsamplingParameters(start_frame, end_frame, downsampling))
     return;
 
   MainWindow* main_window = MainWindow::getInstance();

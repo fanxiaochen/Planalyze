@@ -13,11 +13,7 @@ public:
   ~PlainTextViewer(void);
 
   virtual QSize
-    sizeHint() const {return QSize(width_, height_);}
-
-private:
-  int width_;
-  int height_;
+    sizeHint() const {return QSize(320, 480);}
 };
 
 #endif /*PLAIN_TEXT_VIEWER_H*/

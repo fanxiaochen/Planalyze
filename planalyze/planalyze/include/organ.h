@@ -45,8 +45,7 @@ public:
 
   void setSkeleton(const std::vector<CgalPoint>& skeleton) {skeleton_ = skeleton;}
   std::vector<CgalPoint>& getSkeleton(void) {return skeleton_;}
-  double distance(const CgalPoint& point);
-  double distance(const Organ& organ);
+  double computeSkeletonToPointDistance(const CgalPoint& point);
 
   double computeArea(void);
 

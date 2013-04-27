@@ -97,6 +97,8 @@ public slots:
   void bSmoothStems(void);
   void fSmoothLeaves(void);
   void bSmoothLeaves(void);
+  void fReorderOrgans(void);
+  void bReorderOrgans(void);
 
 signals:
   void progressValueChanged(int value);
@@ -111,7 +113,7 @@ private:
   PointCloudMap  point_cloud_map_;
   void showPointCloud(const QPersistentModelIndex& index);
   void hidePointCloud(const QPersistentModelIndex& index);
-  void showPointCloudSceneInformation(void) const;
+  void showPointCloudSceneInformation(void);
   typedef std::unordered_map<std::string, osg::ref_ptr<PointCloud> > PointCloudCacheMap;
   PointCloudCacheMap point_cloud_cache_map_;
   void limitPointCloudCacheSize(void);
@@ -133,6 +135,8 @@ private:
   void bSmoothStems(double smooth_cost, int start_frame, int end_frame);
   void fSmoothLeaves(double smooth_cost, int start_frame, int end_frame);
   void bSmoothLeaves(double smooth_cost, int start_frame, int end_frame);
+  void fReorderOrgans(int start_frame, int end_frame);
+  void bReorderOrgans(int start_frame, int end_frame);
 
 private:
   bool recursiveCheck(const QModelIndex &index, const QVariant &value);

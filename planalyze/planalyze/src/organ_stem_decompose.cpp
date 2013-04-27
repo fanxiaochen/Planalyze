@@ -274,7 +274,7 @@ void PointCloud::absoluteDetectStems(void)
     size_t min_organ = 0;
     for (size_t j = 0, j_end = stems_.size(); j < j_end; ++ j)
     {
-      double distance = stems_[j].distance(at(i).cast<CgalPoint>());
+      double distance = stems_[j].computeSkeletonToPointDistance(at(i).cast<CgalPoint>());
       if (distance < min_distance)
       {
         min_distance = distance;
@@ -288,7 +288,7 @@ void PointCloud::absoluteDetectStems(void)
   trimOrgans(false);
   locker.relock();
 
-  updateOrganIdAndFeature();
+  updateOrganFeature();
 
   expire();
 

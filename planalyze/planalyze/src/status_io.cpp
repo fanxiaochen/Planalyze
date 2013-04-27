@@ -32,10 +32,10 @@ void PointCloud::loadStatus(void)
   }
 
   QDomElement root = doc.documentElement();
-  if (root.tagName() != QString("frame_%1").arg(getFrame(), 5, 10, QChar('0'))) {
+  //if (root.tagName() != QString("frame_%1").arg(getFrame(), 5, 10, QChar('0'))) {
     //QMessageBox::critical(main_window, "PointCloud::loadStatus", "Unmatch status file");
-    return;
-  }
+  //  return;
+  //}
 
   QMutexLocker locker(&mutex_);
 

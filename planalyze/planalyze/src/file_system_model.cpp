@@ -575,7 +575,7 @@ void FileSystemModel::hideAndShowPointCloud(int hide_frame, int hide_view, int s
   return;
 }
 
-void FileSystemModel::showPointCloudSceneInformation(void) const
+void FileSystemModel::showPointCloudSceneInformation(void)
 {
   QString information("Displaying Point Cloud:\n");
 
@@ -601,7 +601,11 @@ void FileSystemModel::showPointCloudSceneInformation(void) const
     if (view < 12)
       information += QString("Frame %1 View %2\n").arg(frame, 5, 10, QChar('0')).arg(view, 2, 10, QChar('0'));
     else
-      information += QString("Frame %1\n").arg(frame, 5, 10, QChar('0'));
+    {
+      osg::ref_ptr<PointCloud> point_cloud = getPointCloud(frame);
+      information += QString("Frame %1 StemNum:%2 LeafNum:%3\n").arg(frame, 5, 10, QChar('0'))
+        .arg(point_cloud->getStemNum()).arg(point_cloud->getLeafNum());
+    }
   }
   MainWindow::getInstance()->getInformation()->setText(information.toStdString(), 20, 20);
 
@@ -1227,6 +1231,34 @@ void FileSystemModel::bSmoothLeaves(double smooth_cost, int start_frame, int end
   return;
 }
 
+void FileSystemModel::fReorderOrgans(int start_frame, int end_frame)
+{
+  for (int forward_frame = start_frame; forward_frame <= end_frame; ++ forward_frame)
+  {
+    osg::ref_ptr<PointCloud> backward_frame_current = getPointCloud(forward_frame);
+    backward_frame_current->reorderOrgans(true);
+
+    timeToHideAndShowPointCloud(forward_frame-1, 12, forward_frame, 12);
+    emit progressValueChanged(forward_frame-start_frame+1);
+  }
+
+  return;
+}
+
+void FileSystemModel::bReorderOrgans(int start_frame, int end_frame)
+{
+  for (int backward_frame = start_frame; backward_frame >= end_frame; -- backward_frame)
+  {
+    osg::ref_ptr<PointCloud> backward_frame_current = getPointCloud(backward_frame);
+    backward_frame_current->reorderOrgans(false);
+
+    timeToHideAndShowPointCloud(backward_frame+1, 12, backward_frame, 12);
+    emit progressValueChanged(backward_frame-end_frame+1);
+  }
+
+  return;
+}
+
 void FileSystemModel::forwardClassify(void)
 {
   int start_frame, end_frame;
@@ -1364,6 +1396,50 @@ void FileSystemModel::fSmoothLeaves(void)
   connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
 
   watcher->setFuture(QtConcurrent::run(this, &FileSystemModel::fSmoothLeaves, smooth_cost, start_frame, end_frame));
+
+  return;
+}
+
+void FileSystemModel::fReorderOrgans(void)
+{
+  int start_frame, end_frame;
+  if (!ParameterManager::getInstance().getFrameParameters(start_frame, end_frame))
+    return;
+
+  ProgressBar* progress_bar = new ProgressBar(MainWindow::getInstance());
+  progress_bar->setRange(0, end_frame-start_frame+1);
+  progress_bar->setValue(0);
+  progress_bar->setFormat(QString("Forward Reorder Organs: %p% completed"));
+  progress_bar->setTextVisible(true);
+  MainWindow::getInstance()->statusBar()->addPermanentWidget(progress_bar);
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(this, SIGNAL(progressValueChanged(int)), progress_bar, SLOT(setValue(int)));
+  connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
+
+  watcher->setFuture(QtConcurrent::run(this, &FileSystemModel::fReorderOrgans, start_frame, end_frame));
+
+  return;
+}
+
+void FileSystemModel::bReorderOrgans(void)
+{
+  int start_frame, end_frame;
+  if (!ParameterManager::getInstance().getFrameParameters(start_frame, end_frame))
+    return;
+
+  ProgressBar* progress_bar = new ProgressBar(MainWindow::getInstance());
+  progress_bar->setRange(0, end_frame-start_frame+1);
+  progress_bar->setValue(0);
+  progress_bar->setFormat(QString("Backward Reorder Organs: %p% completed"));
+  progress_bar->setTextVisible(true);
+  MainWindow::getInstance()->statusBar()->addPermanentWidget(progress_bar);
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(this, SIGNAL(progressValueChanged(int)), progress_bar, SLOT(setValue(int)));
+  connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
+
+  watcher->setFuture(QtConcurrent::run(this, &FileSystemModel::bReorderOrgans, end_frame, start_frame));
 
   return;
 }

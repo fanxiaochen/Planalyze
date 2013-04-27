@@ -171,7 +171,7 @@ void PointCloud::smoothLeaves(double smooth_cost, bool forward)
     PclRichPoint& point = at(site_indices[i]);
     for (size_t j = 0, j_end = leaf_num; j < j_end; ++ j)
     {
-      double distance = computePointKdTreeDistance(point, leaf_kdtrees[j]);
+      double distance = computePointKdTreeDistanceL2(point, leaf_kdtrees[j]);
       gco->setDataCost(i, j, distance*cost_scale);
     }
   }
@@ -190,7 +190,7 @@ void PointCloud::smoothLeaves(double smooth_cost, bool forward)
   collectLeaves();
 
   locker.unlock();
-  trimOrgans(true);
+  //trimOrgans(true);
   locker.relock();
 
   save(filename_);

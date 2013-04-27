@@ -29,7 +29,7 @@ void PointCloud::extendStems(void)
       size_t min_idx = 0;
       for (size_t j = 0, j_end = stems_.size(); j < j_end; ++ j)
       {
-        double distance = stems_[j].distance(point.cast<CgalPoint>());
+        double distance = stems_[j].computeSkeletonToPointDistance(point.cast<CgalPoint>());
         if (min_distance > distance)
         {
           min_distance = distance;
@@ -41,7 +41,7 @@ void PointCloud::extendStems(void)
       stems_[min_idx].addPoint(i);
     }
 
-    updateOrganIdAndFeature();
+    updateOrganFeature();
   }
 
   save(filename_);
@@ -140,7 +140,7 @@ void PointCloud::smoothStems(double smooth_cost, bool forward)
     double min_distance = std::numeric_limits<double>::max();
     for (size_t j = 0, j_end = stem_num; j < j_end; ++ j)
     {
-      double distance = stems_ngbr[j].distance(point.cast<CgalPoint>());
+      double distance = stems_ngbr[j].computeSkeletonToPointDistance(point.cast<CgalPoint>());
       min_distance = std::min(min_distance, distance);
       if (distance > distance_threshold)
       {

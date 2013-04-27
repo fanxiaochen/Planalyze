@@ -199,21 +199,40 @@ void MainWindow::init(void)
   setCentralWidget(osg_viewer_widget_);
   osg_viewer_widget_->startRendering();
 
-  QDockWidget* dock_widget_status_file = new QDockWidget("File Viewer", this);
-  addDockWidget(Qt::LeftDockWidgetArea, dock_widget_status_file);
-  dock_widget_status_file->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-  ui_.menuView->addAction(dock_widget_status_file->toggleViewAction());
-  file_viewer_widget_->setParent(dock_widget_status_file);
-  dock_widget_status_file->setWidget(file_viewer_widget_);
+  QDockWidget* dock_widget_file_viewer = new QDockWidget("File Viewer", this);
+  addDockWidget(Qt::LeftDockWidgetArea, dock_widget_file_viewer);
+  dock_widget_file_viewer->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
+  ui_.mainToolBar->addAction(dock_widget_file_viewer->toggleViewAction());
+  file_viewer_widget_->setParent(dock_widget_file_viewer);
+  dock_widget_file_viewer->setWidget(file_viewer_widget_);
 
   dock_widget_statistics_ = new QDockWidget("Statistics", this);
   addDockWidget(Qt::BottomDockWidgetArea, dock_widget_statistics_);
   dock_widget_statistics_->setAllowedAreas(Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea);
-  ui_.menuBar->addAction(dock_widget_statistics_->toggleViewAction());
+  ui_.mainToolBar->addAction(dock_widget_statistics_->toggleViewAction());
   statistics_viewer_widget_->setParent(dock_widget_statistics_);
   dock_widget_statistics_->setWidget(statistics_viewer_widget_);
   dock_widget_statistics_->toggleViewAction()->setChecked(false);
   dock_widget_statistics_->setHidden(true);
+
+  QDockWidget* dock_widget_image_viewer = new QDockWidget("Image Viewer", this);
+  addDockWidget(Qt::TopDockWidgetArea, dock_widget_image_viewer);
+  dock_widget_image_viewer->setAllowedAreas(Qt::NoDockWidgetArea);
+  dock_widget_image_viewer->setFloating(true);
+  ui_.mainToolBar->addAction(dock_widget_image_viewer->toggleViewAction());
+  image_viewer_->setParent(dock_widget_image_viewer);
+  dock_widget_image_viewer->setWidget(image_viewer_);
+  dock_widget_image_viewer->toggleViewAction()->setChecked(false);
+  dock_widget_image_viewer->setHidden(true);
+
+  QDockWidget* dock_widget_log_viewer = new QDockWidget("Log Viewer", this);
+  addDockWidget(Qt::RightDockWidgetArea, dock_widget_log_viewer);
+  dock_widget_log_viewer->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
+  ui_.mainToolBar->addAction(dock_widget_log_viewer->toggleViewAction());
+  plain_text_viewer_->setParent(dock_widget_log_viewer);
+  dock_widget_log_viewer->setWidget(plain_text_viewer_);
+  dock_widget_log_viewer->toggleViewAction()->setChecked(false);
+  dock_widget_log_viewer->setHidden(true);
 
   connect(this, SIGNAL(timeToUpdateStatusMessage(QString)), statusBar(), SLOT(showMessage(QString)));
 
@@ -244,6 +263,8 @@ void MainWindow::init(void)
   connect(ui_.actionBSmoothStems, SIGNAL(triggered()), file_system_model, SLOT(bSmoothStems()));
   connect(ui_.actionFSmoothLeaves, SIGNAL(triggered()), file_system_model, SLOT(fSmoothLeaves()));
   connect(ui_.actionBSmoothLeaves, SIGNAL(triggered()), file_system_model, SLOT(bSmoothLeaves()));
+  connect(ui_.actionFReorderOrgans, SIGNAL(triggered()), file_system_model, SLOT(fReorderOrgans()));
+  connect(ui_.actionBReorderOrgans, SIGNAL(triggered()), file_system_model, SLOT(bReorderOrgans()));
 
   //rendering menu
   connect(ui_.actionIncreasePointSize, SIGNAL(triggered()), osg_viewer_widget_, SLOT(increasePointSize()));

@@ -191,7 +191,6 @@ void Organ::updateOrientationFeature(void)
   CgalSegment segment;
   CGALUtility::computeSegment(getPoints(), segment);
 
-
   double segment_length = std::sqrt(segment.squared_length());
 
   skeleton_.clear();
@@ -217,22 +216,22 @@ void Organ::updateOrientationFeature(void)
     {
       PclRichPoint point(skeleton_[i]);
 
-      std::vector<int> neighbor_indices(1);
-      std::vector<float> neighbor_squared_distances(1);
-      int neighbor_num = kdtree->nearestKSearch(point, 1, neighbor_indices, neighbor_squared_distances);
+      std::vector<int> indices(1);
+      std::vector<float> distances(1);
+      int neighbor_num = kdtree->nearestKSearch(point, 1, indices, distances);
 
       double search_radius = search_radius_threshold;
-      if (neighbor_squared_distances[0] > search_radius*search_radius)
-        search_radius = 1.1*std::sqrt(neighbor_squared_distances[0]);
+      if (distances[0] > search_radius*search_radius)
+        search_radius = 1.1*std::sqrt(distances[0]);
 
-      neighbor_num = kdtree->radiusSearch(point, search_radius, neighbor_indices, neighbor_squared_distances);
+      neighbor_num = kdtree->radiusSearch(point, search_radius, indices, distances);
 
       osg::Vec3 center(0.0f, 0.0f, 0.0f);
       double total_weight = 0.0;
       for (size_t j = 0; j < neighbor_num; ++ j)
       {
-        osg::Vec3 offset = point_cloud_->at(neighbor_indices[j]).cast<osg::Vec3>();
-        double weight = std::exp(-neighbor_squared_distances[j]/std::pow(search_radius, 2.0));
+        osg::Vec3 offset = point_cloud_->at(indices[j]).cast<osg::Vec3>();
+        double weight = std::exp(-distances[j]/std::pow(search_radius, 2.0));
         center = center + offset*weight;
         total_weight += weight;
       }
@@ -280,40 +279,13 @@ void Organ::setId(size_t id)
   return;
 }
 
-double Organ::distance(const CgalPoint& point)
+double Organ::computeSkeletonToPointDistance(const CgalPoint& point)
 {
   double min_distance = std::numeric_limits<double>::max();
   for (size_t i = 0, i_end = skeleton_.size()-1; i < i_end; ++ i)
   {
     CgalSegment segment(skeleton_[i], skeleton_[i+1]);
     double distance = CGAL::squared_distance(point, segment);
-    min_distance = std::min(min_distance, distance);
-  }
-
-  return std::sqrt(min_distance);
-}
-
-double Organ::distance(const Organ& organ)
-{
-  if (skeleton_.empty() || organ.skeleton_.empty())
-  {
-    std::cout << "Error: empty organ skeleton!" << std::endl;
-    return 0;
-  }
-
-  CgalPoint top = skeleton_[0];
-  for (size_t i = 0, i_end = skeleton_.size(); i < i_end; ++ i)
-  {
-    if (top.y() > skeleton_[i].y())
-    {
-      top = skeleton_[i];
-    }
-  }
-
-  double min_distance = std::numeric_limits<double>::max();
-  for (size_t i = 0, i_end = organ.skeleton_.size(); i < i_end; ++ i)
-  {
-    double distance = CGAL::squared_distance(top, organ.skeleton_[i]);
     min_distance = std::min(min_distance, distance);
   }
 

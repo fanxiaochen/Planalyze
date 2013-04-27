@@ -42,7 +42,7 @@ ParameterManager::ParameterManager(void)
   stem_skeleton_radius_(new DoubleParameter("Stem Skeleton Radius", "Stem Skeleton Radius", 4, 0.5, 16, 0.5)),
   stem_length_threshold_(new DoubleParameter("Stem Skeleton Length", "Stem Skeleton Length", 8, 0.5, 32, 0.5)),
   curvature_quantize_(new DoubleParameter("Curvature Quantize", "Threshold Quantize", 0.0015, 0.00001, 0.1, 0.00001)),
-  triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 1.5, 1.0, 8.0, 0.1)),
+  triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 2.5, 1.0, 8.0, 0.1)),
   radius_(new IntParameter("Radius", "Radius", 500, 500, 1000, 1)),
   times_(new IntParameter("Times", "Times", 5, 1, 100)),
   is_using_pot_(new BoolParameter("Pot or Not", "Pot or Not", true))
@@ -242,7 +242,7 @@ bool ParameterManager::getTrackAndEvolveParameters(double& smooth_cost, int& sta
   return true;
 }
 
-bool ParameterManager::getFrameParameters(int& start_frame, int& end_frame, int& downsampling)
+bool ParameterManager::getDownsamplingParameters(int& start_frame, int& end_frame, int& downsampling)
 {
   ParameterDialog parameter_dialog("Frame Parameters", MainWindow::getInstance());
   parameter_dialog.addParameter(downsampling_);
@@ -251,6 +251,18 @@ bool ParameterManager::getFrameParameters(int& start_frame, int& end_frame, int&
     return false;
 
   downsampling = *downsampling_;
+  getFrameparametersImpl(start_frame, end_frame, true);
+
+  return true;
+}
+
+bool ParameterManager::getFrameParameters(int& start_frame, int& end_frame)
+{
+  ParameterDialog parameter_dialog("Frame Parameters", MainWindow::getInstance());
+  addFrameParameters(&parameter_dialog, true);
+  if (!parameter_dialog.exec() == QDialog::Accepted)
+    return false;
+
   getFrameparametersImpl(start_frame, end_frame, true);
 
   return true;

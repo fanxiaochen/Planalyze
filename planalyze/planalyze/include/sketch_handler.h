@@ -34,11 +34,8 @@ public slots:
 protected:
   virtual void updateImpl(void);
 
-  void addPoint(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
-  void removeEdge(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
-
-  void jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
-  void breakSkeleton(osg::Vec3 point_1, osg::Vec3 point_2);
+  void jointSkeleton(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
+  void breakSkeleton(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 
 private:
   osg::ref_ptr<osg::Vec3Array>  current_path_;

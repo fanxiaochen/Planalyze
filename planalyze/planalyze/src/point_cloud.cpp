@@ -88,8 +88,6 @@ PointCloud::PointCloud(void)
 
 PointCloud::~PointCloud(void)
 {
-  saveStatus();
-
   delete triangulation_;
   delete point_graph_;
 }
@@ -188,6 +186,8 @@ bool PointCloud::save(const std::string& filename)
     if (pcd_writer.writeBinaryCompressed<PclRichPoint>(filename, *this) != 0)
       return false;
   }
+
+  saveStatus();
 
   return true;
 }

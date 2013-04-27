@@ -141,7 +141,7 @@ void PointCloud::classifyLeafStem(double smooth_cost, bool forward)
       size_t min_stem_idx = 0;
       for (size_t j = 0, j_end = stems_reference.size(); j < j_end; ++ j)
       {
-        float distance = computePointKdTreeDistance(at(i), stems_kdtrees[j]);
+        float distance = computePointKdTreeDistanceL2(at(i), stems_kdtrees[j]);
         if (min_stem_distance > distance)
         {
           min_stem_distance = distance;
@@ -161,7 +161,7 @@ void PointCloud::classifyLeafStem(double smooth_cost, bool forward)
       size_t min_leaf_idx = 0;
       for (size_t j = 0, j_end = leaves_reference.size(); j < j_end; ++ j)
       {
-        float distance = computePointKdTreeDistance(at(i), leaves_kdtrees[j]);
+        float distance = computePointKdTreeDistanceL2(at(i), leaves_kdtrees[j]);
         if (min_leaf_distance > distance)
         {
           min_leaf_distance = distance;

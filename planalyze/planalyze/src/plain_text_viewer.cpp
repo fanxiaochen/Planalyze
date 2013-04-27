@@ -1,9 +1,7 @@
 #include "plain_text_viewer.h"
 
 PlainTextViewer::PlainTextViewer(QWidget * parent)
-  : QPlainTextEdit(parent),
-  width_(640),
-  height_(256)
+  : QPlainTextEdit(parent)
 {
   setReadOnly(true);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);

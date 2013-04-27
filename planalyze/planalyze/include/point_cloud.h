@@ -111,13 +111,14 @@ public:
   KdTreePtr getKdTree(void) {return kdtree_;}
   KdTreePtr getLeafKdTree(int id) const;
   KdTreePtr getStemKdTree(int id) const;
-  static double computePointKdTreeDistance(const PclRichPoint& point, KdTreePtr kdtree);
+  static double computePointKdTreeDistanceL2(const PclRichPoint& point, KdTreePtr kdtree);
   double computeOrganKdTreeDistance(Organ& organ, KdTreePtr kdtree);
 
   // Organ Graph
   void classifyLeafStem(double smooth_cost, bool forward);
   void smoothLeaves(double smooth_cost, bool forward);
   void smoothStems(double smooth_cost, bool forward);
+  void reorderOrgans(bool forward);
 
   static double transformCurvature(double curvature);
 
@@ -140,6 +141,8 @@ public:
   static double getOrganFeature(const Organ& organ);
 
   void trimOrgans(bool is_leaf);
+
+  KdTreePtr getOrganKdTree(int id, bool leaf) const;
 
 public slots:
   void setRotation(void);
@@ -218,12 +221,10 @@ protected:
 
   void extendStems(void);
 
-  void updateOrganIdAndFeature(void);
+  void updateOrganFeature(void);
 
   void initMinMaxCurvature(void);
   void initMinMaxThickness(void);
-
-  KdTreePtr getOrganKdTree(int id, bool leaf) const;
 
   void backup(std::vector<int>& labels, std::vector<int>& ids, std::vector<Organ>& stems, std::vector<Organ>& leaves);
   void rollback(std::vector<int>& labels, std::vector<int>& ids, std::vector<Organ>& stems, std::vector<Organ>& leaves);

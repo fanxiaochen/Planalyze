@@ -69,7 +69,7 @@
     <addaction name="actionRegistrationLUM"/>
     <addaction name="actionRefineAxis"/>
    </widget>
-   <widget class="QMenu" name="menuView">
+   <widget class="QMenu" name="menuRender">
     <property name="title">
      <string>Rendering</string>
     </property>
@@ -77,18 +77,6 @@
     <addaction name="actionDecreasePointSize"/>
     <addaction name="actionIncreaseLineWidth"/>
     <addaction name="actionDecreaseLineWidth"/>
-    <addaction name="separator"/>
-    <addaction name="actionRenderPlant"/>
-    <addaction name="actionRenderPot"/>
-    <addaction name="actionRenderNoise"/>
-    <addaction name="actionRenderLeaves"/>
-    <addaction name="actionRenderStems"/>
-    <addaction name="separator"/>
-    <addaction name="actionRenderNormals"/>
-    <addaction name="actionRenderOrientations"/>
-    <addaction name="actionRenderTriangles"/>
-    <addaction name="separator"/>
-    <addaction name="actionRenderOrgans"/>
     <addaction name="separator"/>
     <addaction name="actionForceCenterScene"/>
     <addaction name="separator"/>
@@ -130,8 +118,6 @@
     <addaction name="separator"/>
     <addaction name="actionSaveParameters"/>
     <addaction name="actionLoadParameters"/>
-    <addaction name="separator"/>
-    <addaction name="actionSkeletonSketcher"/>
    </widget>
    <widget class="QMenu" name="menuGo_Back">
     <property name="title">
@@ -146,6 +132,8 @@
     <addaction name="actionFSmoothStems"/>
     <addaction name="actionBSmoothStems"/>
     <addaction name="separator"/>
+    <addaction name="actionFReorderOrgans"/>
+    <addaction name="actionBReorderOrgans"/>
    </widget>
    <widget class="QMenu" name="menuCapture">
     <property name="title">
@@ -157,7 +145,7 @@
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPointCloud"/>
-   <addaction name="menuView"/>
+   <addaction name="menuRender"/>
    <addaction name="menuBatch"/>
    <addaction name="menuGo_Back"/>
    <addaction name="menuParameter"/>
@@ -556,6 +544,16 @@
   <action name="actionReverseFrames">
    <property name="text">
     <string>Reverse Frames</string>
+   </property>
+  </action>
+  <action name="actionFReorderOrgans">
+   <property name="text">
+    <string>FReorder Organs</string>
+   </property>
+  </action>
+  <action name="actionBReorderOrgans">
+   <property name="text">
+    <string>BReorder Organs</string>
    </property>
   </action>
  </widget>

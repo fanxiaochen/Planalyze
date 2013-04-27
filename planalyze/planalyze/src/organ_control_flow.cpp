@@ -15,8 +15,6 @@
 
 void PointCloud::fillOrganPoints(void)
 {
-  int leaf_num = 0;
-  int stem_num = 0;
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
     int organ_id = at(i).organ_id;
@@ -30,12 +28,12 @@ void PointCloud::fillOrganPoints(void)
       stems_[organ_id].addPoint(i);
   }
 
-  updateOrganIdAndFeature();
+  updateOrganFeature();
 
   return;
 }
 
-double PointCloud::computePointKdTreeDistance(const PclRichPoint& point, KdTreePtr kdtree)
+double PointCloud::computePointKdTreeDistanceL2(const PclRichPoint& point, KdTreePtr kdtree)
 {
   std::vector<int> neighbor_indices(1);
   std::vector<float> neighbor_squared_distances(1);
@@ -50,7 +48,7 @@ double PointCloud::computeOrganKdTreeDistance(Organ& organ, KdTreePtr kdtree)
   const std::vector<int>& indices = organ.getPointIndices();
   for (size_t i = 0, i_end = indices.size(); i < i_end; ++ i)
   {
-    double distance = computePointKdTreeDistance(at(indices[i]), kdtree);
+    double distance = computePointKdTreeDistanceL2(at(indices[i]), kdtree);
     average_distance += std::sqrt(distance);
   }
   average_distance /= indices.size();
@@ -70,14 +68,37 @@ PointCloud::KdTreePtr PointCloud::getLeafKdTree(int id) const
 
 PointCloud::KdTreePtr PointCloud::getOrganKdTree(int id, bool leaf) const
 {
-  if ((leaf && id >= leaves_.size()) || (!leaf && id >= stems_.size()))
+  const Organ* organ = NULL;
+  if (leaf)
+  {
+    for (size_t i = 0, i_end = leaves_.size(); i < i_end; ++ i)
+    {
+      if (leaves_[i].getId() == id)
+      {
+        organ = &leaves_[i];
+        break;
+      }
+    }
+  }
+  else
+  {
+    for (size_t i = 0, i_end = stems_.size(); i < i_end; ++ i)
+    {
+      if (stems_[i].getId() == id)
+      {
+        organ = &stems_[i];
+        break;
+      }
+    }
+  }
+
+  if (organ == NULL)
   {
     std::cout << "frame: " << getFrame() << "\tgetOrganKdTree: error id > num !" << std::endl;
     return KdTreePtr((pcl::KdTreeFLANN<PclRichPoint>*)(NULL));
   }
-  
-  const Organ& organ = (leaf)?(leaves_[id]):(stems_[id]);
-  const std::vector<int>& organ_indices = organ.getPointIndices();
+
+  const std::vector<int>& organ_indices = organ->getPointIndices();
   boost::shared_ptr<std::vector<int> > indices(new std::vector<int>());
   indices->insert(indices->begin(), organ_indices.begin(), organ_indices.end());
 
@@ -261,16 +282,8 @@ void PointCloud::initGcoGraphEdgesLeaves(GCoptimizationGeneralGraph* gco, int sm
   return;
 }
 
-void PointCloud::updateOrganIdAndFeature(void)
+void PointCloud::updateOrganFeature(void)
 {
-  for (size_t i = 0; i < plant_points_num_; ++ i)
-    at(i).organ_id = PclRichPoint::ID_UNINITIALIZED;
-
-  for (size_t i = 0, i_end = stems_.size(); i < i_end; ++ i)
-    stems_[i].setId(i);
-  for (size_t i = 0, i_end = leaves_.size(); i < i_end; ++ i)
-    leaves_[i].setId(i);
-
   for (size_t i = 0, i_end = stems_.size(); i < i_end; ++ i)
     stems_[i].updateFeature();
   for (size_t i = 0, i_end = leaves_.size(); i < i_end; ++ i)
@@ -302,6 +315,73 @@ void PointCloud::rollback(std::vector<int>& labels, std::vector<int>& ids, std::
   }
   stems_ = stems;
   leaves_ = leaves;
+
+  return;
+}
+
+void PointCloud::reorderOrgans(bool forward)
+{
+  QMutexLocker locker(&mutex_);
+
+  osg::ref_ptr<PointCloud> p_ngbr = forward?getPrevFrame():getNextFrame();
+  if (!p_ngbr.valid())
+    return;
+
+  std::vector<int> mapping;
+  std::vector<double> distances;
+
+  {
+    size_t leaf_num = getLeafNum();
+    size_t leaf_num_ngbr = p_ngbr->getLeafNum();
+    if (leaf_num_ngbr != 0 && leaf_num != 0)
+    {
+      mapping.assign(leaf_num_ngbr, -1);
+      distances.assign(leaf_num_ngbr, std::numeric_limits<double>::max());
+
+      for (size_t i = 0; i < leaf_num_ngbr; ++ i)
+      {
+        double distance_min = std::numeric_limits<double>::max();
+        size_t idx_min = 0;
+        for (size_t j = 0; j < leaf_num; ++ j)
+        {
+          double distance = computeOrganKdTreeDistance(leaves_[j], p_ngbr->getOrganKdTree(p_ngbr->getLeaves()[i].getId(), true));;
+          if (distance_min > distance)
+          {
+            distance_min = distance;
+            idx_min = j;
+          }
+        }
+
+        if (mapping[i] == -1 || distances[i] > distance_min)
+        {
+          mapping[i] = idx_min;
+          distances[i] = distance_min;
+        }
+      }
+
+      std::vector<bool> indices(leaf_num, true);
+      size_t max_id = 0;
+      for (size_t i = 0; i < leaf_num_ngbr; ++ i)
+      {
+        leaves_[mapping[i]].setId(p_ngbr->getLeaves()[i].getId());
+        indices[mapping[i]] = false;
+        max_id = std::max(max_id, p_ngbr->getLeaves()[i].getId());
+        std::cout << mapping[i] << "->" << p_ngbr->getLeaves()[i].getId() << std::endl;
+      }
+      std::cout << std::endl;
+
+      for (size_t i = 0; i < leaf_num; ++ i)
+      {
+        if (indices[i] == false)
+          continue;
+        leaves_[i].setId(++max_id);
+      }
+    }
+  }
+
+  save(filename_);
+
+  expire();
 
   return;
 }

@@ -96,9 +96,9 @@ bool SkeletonSketcher::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionA
       if (view)
       {
         if(ea.getModKeyMask()==osgGA::GUIEventAdapter::MODKEY_CTRL)
-          addPoint(view, ea);
+          jointSkeleton(view, ea);
         else if(ea.getModKeyMask()==osgGA::GUIEventAdapter::MODKEY_SHIFT)
-          removeEdge(view, ea);
+          breakSkeleton(view, ea);
         return false;
       }
     }
@@ -110,7 +110,7 @@ bool SkeletonSketcher::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionA
   return false;
 }
 
-void SkeletonSketcher::addPoint(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
+void SkeletonSketcher::jointSkeleton(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
 {
   QMutexLocker locker(&mutex_);
 
@@ -121,7 +121,31 @@ void SkeletonSketcher::addPoint(osgViewer::View* view, const osgGA::GUIEventAdap
   current_path_->push_back(position);
   if (current_path_->size() == 2)
   {
-    jointSkeleton(current_path_->at(0), current_path_->at(1));
+    boost::SkeletonGraph& skeleton_graph = *skeleton_graph_;
+    size_t skeleton_size = boost::num_vertices(skeleton_graph);
+
+    double min_distance_1 = std::numeric_limits<double>::max();
+    double min_distance_2 = std::numeric_limits<double>::max();
+    size_t min_idx_1 = 0;
+    size_t min_idx_2 = 0;
+    for (size_t i = 0; i < skeleton_size; ++ i)
+    {
+      double distance_1 = (skeleton_graph[i]-current_path_->at(0)).length2();
+      double distance_2 = (skeleton_graph[i]-current_path_->at(1)).length2();
+
+      if (min_distance_1 > distance_1)
+      {
+        min_distance_1 = distance_1;
+        min_idx_1 = i;
+      }
+      if (min_distance_2 > distance_2)
+      {
+        min_distance_2 = distance_2;
+        min_idx_2 = i;
+      }
+    }
+
+    boost::add_edge(min_idx_1, min_idx_2, skeleton_graph);
 
     current_path_->clear();
   }
@@ -131,7 +155,7 @@ void SkeletonSketcher::addPoint(osgViewer::View* view, const osgGA::GUIEventAdap
   return;
 }
 
-void SkeletonSketcher::removeEdge(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
+void SkeletonSketcher::breakSkeleton(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
 {
   QMutexLocker locker(&mutex_);
 
@@ -142,30 +166,34 @@ void SkeletonSketcher::removeEdge(osgViewer::View* view, const osgGA::GUIEventAd
   current_path_->push_back(position);
   if (current_path_->size() == 2)
   {
-    breakSkeleton(current_path_->at(0), current_path_->at(1));
+    boost::SkeletonGraph& skeleton_graph = *skeleton_graph_;
+    size_t skeleton_size = boost::num_vertices(skeleton_graph);
+
+    double min_distance_1 = std::numeric_limits<double>::max();
+    double min_distance_2 = std::numeric_limits<double>::max();
+    size_t min_idx_1 = 0;
+    size_t min_idx_2 = 0;
+    for (size_t i = 0; i < skeleton_size; ++ i)
+    {
+      double distance_1 = (skeleton_graph[i]-current_path_->at(0)).length2();
+      double distance_2 = (skeleton_graph[i]-current_path_->at(1)).length2();
+
+      if (min_distance_1 > distance_1)
+      {
+        min_distance_1 = distance_1;
+        min_idx_1 = i;
+      }
+      if (min_distance_2 > distance_2)
+      {
+        min_distance_2 = distance_2;
+        min_idx_2 = i;
+      }
+    }
+
+    boost::remove_edge(min_idx_1, min_idx_2, skeleton_graph);
 
     current_path_->clear();
   }
-
-  expire();
-
-  return;
-}
-
-void SkeletonSketcher::jointSkeleton(osg::Vec3 point_1, osg::Vec3 point_2)
-{
-  QMutexLocker locker(&mutex_);
-
-
-  expire();
-
-  return;
-}
-
-void SkeletonSketcher::breakSkeleton(osg::Vec3 point_1, osg::Vec3 point_2)
-{
-  QMutexLocker locker(&mutex_);
-
 
   expire();
 
