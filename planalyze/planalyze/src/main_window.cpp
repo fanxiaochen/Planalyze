@@ -537,6 +537,11 @@ void MainWindow::saveParameters(void)
 
   ParameterManager::getInstance().saveParameters(filename);
 
+  return;
+}
+
+void MainWindow::saveCaptureParameters(void)
+{
   std::ofstream fout(workspace_.toStdString() + "/parameters.txt");
   fout << "[Current Time] : " << QDateTime::currentDateTime().toString().toStdString() << std::endl
     << "[Frame Period] : " << frame_time_ << std::endl
@@ -644,10 +649,10 @@ void MainWindow::startCapture()
     return;
   }
 
-  saveParameters();
+  saveCaptureParameters();
   ui_.actionStopCapture->setEnabled(true);
 
-  frame_timer_id_ = startTimer(10008*frame_time_);
+  frame_timer_id_ = startTimer(1000*frame_time_);
   view_timer_id_ = startTimer(1000*view_time_);
 }
 

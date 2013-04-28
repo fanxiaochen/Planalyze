@@ -75,6 +75,8 @@ public slots:
   void loadParameters(void);
   void saveParameters(void);
 
+  void saveCaptureParameters(void);
+
 protected:
   virtual void timerEvent(QTimerEvent *event);
   virtual void closeEvent(QCloseEvent *event);

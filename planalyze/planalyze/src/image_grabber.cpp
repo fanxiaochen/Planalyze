@@ -3,7 +3,6 @@
 #include <QDir>
 #include <QMutexLocker>
 #include <QApplication>
-#include <QProgressBar>
 #include <QElapsedTimer>
 #include <QFutureWatcher>
 #include <QtConcurrentRun>
@@ -242,18 +241,8 @@ void ImageGrabber::saveImpl(const QString& images_folder, const QString& points_
 
 void ImageGrabber::save(const QString& images_folder, const QString& points_folder)
 {
-  QProgressBar* progress_bar = new QProgressBar(main_window_);
-  progress_bar->setRange(0, (int)(frame_images_.size()-1));
-  progress_bar->setValue(0);
-  progress_bar->setFormat(QString("Saving stripes: %p% completed"));
-  progress_bar->setTextVisible(true);
-  main_window_->statusBar()->addPermanentWidget(progress_bar);
-
-  QObject::connect(this, SIGNAL(stripesSaved(int)), progress_bar, SLOT(setValue(int)));
-
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   QObject::connect(watcher, SIGNAL(finished()), watcher, SLOT(deleteLater()));
-  QObject::connect(watcher, SIGNAL(finished()), progress_bar, SLOT(deleteLater()));
 
   watcher->setFuture(QtConcurrent::run(this, &ImageGrabber::saveImpl, images_folder, points_folder));
 
