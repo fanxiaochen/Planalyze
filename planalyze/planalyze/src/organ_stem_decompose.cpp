@@ -24,37 +24,40 @@ void PointCloud::sampleSkeletonPoints(void)
   boost::SkeletonGraph& stem_graph = *(MainWindow::getInstance()->getSkeletonSketcher()->getSkeletonGraph());
   stem_graph.clear();
 
-  std::vector<size_t> point_indices;
+  boost::shared_ptr<std::vector<int> > point_indices(new std::vector<int>());
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
-    if (at(i).label == PclRichPoint::LABEL_LEAF)
+    if (at(i).label != PclRichPoint::LABEL_STEM)
       continue;
-    point_indices.push_back(i);
+    point_indices->push_back(i);
   }
-  std::random_shuffle(point_indices.begin(), point_indices.end());
-  size_t sample_num = point_indices.size()/10;
+  std::random_shuffle(point_indices->begin(), point_indices->end());
+  size_t sample_num = point_indices->size()/20;
   for (size_t i = 0; i < sample_num; ++ i)
-    boost::add_vertex(at(point_indices[i]).cast<osg::Vec3>(), stem_graph);
+    boost::add_vertex(at(point_indices->at(i)).cast<osg::Vec3>(), stem_graph);
 
   pcl::PointCloud<PclPoint>::Ptr stem_skeleton(new pcl::PointCloud<PclPoint>());
   for (size_t i = 0, i_end = sample_num; i < i_end; ++ i)
     stem_skeleton->push_back(PclPoint(stem_graph[i]));
 
+  KdTreePtr kdtree_stem(new pcl::KdTreeFLANN<PclRichPoint>(false));
+  kdtree_stem->setInputCloud(boost::shared_ptr<const PclRichPointCloud>(this, NullDeleter()), point_indices);
+
   double search_radius = ParameterManager::getInstance().getStemSkeletonRadius();
 
-  for (size_t round = 0; round < 8; ++ round)
+  for (size_t round = 0; round < 128; ++ round)
   {
     boost::shared_ptr<pcl::KdTreeFLANN<PclPoint> > kdtree(new pcl::KdTreeFLANN<PclPoint>(false));
     kdtree->setInputCloud(stem_skeleton);
 
-    for (size_t i = 0; i < sample_num; ++ i)
+    for (size_t i = 0, i_end = stem_skeleton->size(); i < i_end; ++ i)
     {
       osg::Vec3 center(0.0f, 0.0f, 0.0f);
       osg::Vec3 orientation(0.0f, 0.0f, 0.0f);
       {
         std::vector<int> indices;
         std::vector<float> distances;
-        int neighbor_num = kdtree_->radiusSearch(PclRichPoint(stem_graph[i]), search_radius, indices, distances);
+        int neighbor_num = kdtree_stem->radiusSearch(PclRichPoint(stem_graph[i]), search_radius, indices, distances);
 
         double total_weight = 0.0;
         for (size_t j = 0; j < neighbor_num; ++ j)
@@ -91,8 +94,37 @@ void PointCloud::sampleSkeletonPoints(void)
       stem_graph[i] = center + span*0.4;
     }
 
-    for (size_t i = 0; i < sample_num; ++ i)
-      stem_skeleton->at(i) = PclPoint(stem_graph[i]);
+    {
+      double distance_threshold = search_radius*search_radius/16;
+      pcl::PointCloud<PclPoint>::Ptr points_delete(new pcl::PointCloud<PclPoint>());
+      for (size_t i = 0, i_end = stem_skeleton->size(); i < i_end; ++ i)
+        points_delete->push_back(PclPoint(stem_graph[i]));
+      boost::shared_ptr<pcl::KdTreeFLANN<PclPoint> > kdtree_delete(new pcl::KdTreeFLANN<PclPoint>(false));
+      kdtree_delete->setInputCloud(points_delete);
+
+      std::vector<bool> flags(stem_skeleton->size(), true);
+      stem_skeleton->clear();
+      stem_graph.clear();
+      for (size_t i = 0, i_end = flags.size(); i < i_end; ++ i)
+      {
+        if (flags[i])
+        {
+          stem_skeleton->push_back(points_delete->at(i));
+          boost::add_vertex(points_delete->at(i).cast<osg::Vec3>(), stem_graph);
+        }
+
+        std::vector<int> indices(1);
+        std::vector<float> distances(1);
+        int neighbor_num = kdtree_delete->nearestKSearch(points_delete->at(i), 1, indices, distances);
+
+        if (distances.front() < distance_threshold)
+        {
+          neighbor_num = kdtree_delete->radiusSearch(points_delete->at(i), distance_threshold, indices, distances);
+          for (size_t j = 0, j_end = indices.size(); j < j_end; ++ j)
+            flags[indices[j]] = false;
+        }
+      }
+    }
   }
 
   MainWindow::getInstance()->getSkeletonSketcher()->expire();
