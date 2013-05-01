@@ -106,7 +106,7 @@ osg::Vec4 Organ::getColor(void) const
   if (point_indices_.empty())
     color = ColorMap::Instance().getColor(ColorMap::LIGHT_BLUE);
   else
-    color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, is_leaf_?(2*id_+1):(2*id_));
+    color = ColorMap::Instance().getColor(ColorMap::LIGHT_BLUE);//ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, is_leaf_?(2*id_+1):(2*id_));
 
   return color;
 }

@@ -51,7 +51,6 @@ void FileViewerWidget::contextMenuEvent(QContextMenuEvent *event)
     QMenu* stem_menu = menu.addMenu("Frame Decomposition");
     stem_menu->addAction("Leaf-Stem Classify", point_cloud, SLOT(absoluteClassify()));
     stem_menu->addAction("Decompose Leaves", point_cloud, SLOT(absoluteDetectLeaves()));
-    stem_menu->addAction("Sample Skeleton Points", point_cloud, SLOT(sampleSkeletonPoints()));
     stem_menu->addAction("Initialize Skeleton", point_cloud, SLOT(initializeSkeleton()));
     stem_menu->addAction("Extract Stem Skeleton", point_cloud, SLOT(extractStemSkeleton()));
     stem_menu->addAction("Decompose Stems", point_cloud, SLOT(absoluteDetectStems()));

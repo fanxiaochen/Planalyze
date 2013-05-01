@@ -28,7 +28,7 @@ void PointCloud::fillOrganPoints(void)
       stems_[organ_id].addPoint(i);
   }
 
-  updateOrganFeature();
+  //updateOrganFeature();
 
   return;
 }

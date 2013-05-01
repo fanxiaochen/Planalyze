@@ -27,8 +27,8 @@ void PointCloud::sampleSkeletonPoints(void)
   boost::shared_ptr<std::vector<int> > point_indices(new std::vector<int>());
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
-    if (at(i).label != PclRichPoint::LABEL_STEM)
-      continue;
+    //if (at(i).label != PclRichPoint::LABEL_STEM)
+    //  continue;
     point_indices->push_back(i);
   }
   std::random_shuffle(point_indices->begin(), point_indices->end());
@@ -62,8 +62,8 @@ void PointCloud::sampleSkeletonPoints(void)
         double total_weight = 0.0;
         for (size_t j = 0; j < neighbor_num; ++ j)
         {
-          if (at(indices[j]).label != PclRichPoint::LABEL_STEM)
-            continue;
+          //if (at(indices[j]).label != PclRichPoint::LABEL_STEM)
+          //  continue;
           osg::Vec3 offset = at(indices[j]).cast<osg::Vec3>();
           double weight = std::exp(-distances[j]/std::pow(search_radius, 2.0));
           center = center + offset*weight;
@@ -134,6 +134,8 @@ void PointCloud::sampleSkeletonPoints(void)
 
 void PointCloud::initializeSkeleton(void)
 {
+  sampleSkeletonPoints();
+
   QMutexLocker locker(&mutex_);
 
   boost::SkeletonGraph& stem_graph = *(MainWindow::getInstance()->getSkeletonSketcher()->getSkeletonGraph());
@@ -178,6 +180,32 @@ void PointCloud::initializeSkeleton(void)
   {
     if (boost::degree(i, stem_graph) <= 2)
       continue;
+    boost::clear_vertex(i, stem_graph);
+  }
+
+  // filter by angle
+  typedef boost::SkeletonGraph::out_edge_iterator out_edge_iterator;
+  for (size_t i = 0, i_end = boost::num_vertices(stem_graph); i < i_end; ++ i)
+  {
+    if (boost::degree(i, stem_graph) <= 1)
+      continue;
+
+    std::pair<out_edge_iterator, out_edge_iterator> out_edges = boost::out_edges(i, stem_graph);
+    out_edge_iterator it_0 = out_edges.first;
+    out_edge_iterator it_2 = ++ out_edges.first;
+    const osg::Vec3& point_0 = stem_graph[boost::target(*it_0, stem_graph)];
+    const osg::Vec3& point_1 = stem_graph[i];
+    const osg::Vec3& point_2 = stem_graph[boost::target(*it_2, stem_graph)];
+
+    osg::Vec3 vector_0_1 = point_1-point_0;
+    osg::Vec3 vector_1_2 = point_2-point_1;
+    vector_0_1.normalize();
+    vector_1_2.normalize();
+
+    double angle = std::acos(vector_0_1*vector_1_2);
+    if (angle < M_PI/6)
+      continue;
+
     boost::clear_vertex(i, stem_graph);
   }
 
@@ -277,8 +305,8 @@ void PointCloud::extractStemSkeleton(void)
   for (size_t i = 0, i_end = skeleton_components.size(); i < i_end; ++ i)
   {
     double length = skeleton_components[i].second;
-    if (length < stem_length_threshold)
-      continue;
+    //if (length < stem_length_threshold)
+    //  continue;
 
     stems_.push_back(Organ(this, stems_.size(), false));
     std::vector<CgalPoint> skeleton;
@@ -287,6 +315,8 @@ void PointCloud::extractStemSkeleton(void)
       skeleton.push_back(Caster<osg::Vec3, CgalPoint>(stem_graph[point_indices[j]]));
     stems_.back().setSkeleton(skeleton);
   }
+
+  saveStatus();
 
   expire();
 
