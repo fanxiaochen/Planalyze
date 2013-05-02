@@ -166,18 +166,17 @@ bool PointCloud::save(const std::string& filename)
 {
   if (QString(filename.c_str()).right(3) == "ply")
   {
-    PclPointCloud point_cloud;
-    osg::Vec3 pivot_point(-13.382786, 50.223461, 917.477600);
-    osg::Vec3 axis_normal(-0.054323, -0.814921, -0.577020);
-    osg::Matrix transformation = osg::Matrix::translate(-pivot_point)*osg::Matrix::rotate(axis_normal, osg::Vec3(0, 0, 1));
+    pcl::PointCloud<pcl::PointXYZRGB> point_cloud;
     for (size_t i = 0; i < plant_points_num_; ++ i)
     {
-      osg::Vec3 point = at(i).cast<osg::Vec3>();
-      point = transformation.preMult(point);
-      point_cloud.push_back(PclPoint(point.x(), point.y(), point.z()));
+      PclRichPoint point = at(i);
+      point_cloud.push_back(pcl::PointXYZRGB(point.r, point.g, point.b));
+      point_cloud.back().x = point.x;
+      point_cloud.back().y = point.y;
+      point_cloud.back().z = point.z;
     }
     pcl::PLYWriter ply_writer;
-    if (ply_writer.write<PclPoint>(filename, point_cloud) != 0)
+    if (ply_writer.write<pcl::PointXYZRGB>(filename, point_cloud) != 0)
       return false;
   }
   else

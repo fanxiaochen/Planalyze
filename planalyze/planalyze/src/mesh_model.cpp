@@ -30,7 +30,7 @@ void MeshModel::virtualScan(double noise, double distance, double resolution)
 
   osg::Matrix switch_yz(osg::Matrix::rotate(osg::Vec3(0, 1, 0), osg::Vec3(0, 0, 1)));
 
-#define MELON
+//#define MELON
   // for the synthetic melon
 #ifdef MELON
   osg::Vec3 scale(8, 8, 8);
@@ -136,7 +136,7 @@ void MeshModel::updateImpl()
 {
   osg::Matrix switch_yz(osg::Matrix::rotate(osg::Vec3(0, 1, 0), osg::Vec3(0, 0, 1)));
 
-#define MELON
+//#define MELON
 #ifdef MELON
   // for the synthetic melon
   osg::Vec3 scale(8, 8, 8);
