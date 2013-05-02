@@ -1,6 +1,13 @@
-﻿#include <pcl/kdtree/kdtree_flann.h>
+﻿#include <QFileDialog>
+#include <QTextStream>
+
+#include <pcl/kdtree/kdtree_flann.h>
 
 #include <boost/graph/adjacency_list.hpp>
+
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Triangulation_vertex_base_with_info_3.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 
 #include "organ.h"
 #include "color_map.h"
@@ -15,6 +22,30 @@
 
 void PointCloud::fillOrganPoints(void)
 {
+  if (stems_.empty() || leaves_.empty())
+  {
+    int stem_num = 0;
+    int leaf_num = 0;
+    for (size_t i = 0; i < plant_points_num_; ++ i)
+    {
+      int organ_id = at(i).organ_id;
+      if (organ_id == PclRichPoint::ID_UNINITIALIZED)
+        continue;
+
+      int label = at(i).label;
+      if (label == PclRichPoint::LABEL_LEAF)
+        leaf_num = std::max(organ_id, leaf_num);
+      else if (label == PclRichPoint::LABEL_STEM && organ_id < stems_.size())
+        stem_num = std::max(organ_id, stem_num);
+    }
+    stems_.clear();
+    for (size_t i = 0; i < stem_num+1; ++ i)
+      stems_.push_back(Organ(this, i, false));
+    leaves_.clear();
+    for (size_t i = 0; i < leaf_num+1; ++ i)
+      leaves_.push_back(Organ(this, i, true));
+  }
+
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
     int organ_id = at(i).organ_id;
@@ -379,11 +410,12 @@ void PointCloud::reorderOrgans(bool forward)
   //  }
   //}
 
-  osg::Vec3 pivot_point(-13.382786, 50.223461, 917.477600);
-  osg::Vec3 axis_normal(-0.054323, -0.814921, -0.577020);
+  osg::Vec3 pivot_point(-77.158821, 66.510941, 980.320374);
+  osg::Vec3 axis_normal(-0.128121, -0.815076, -0.565009);
   osg::Matrix transformation = osg::Matrix::translate(-pivot_point)*osg::Matrix::rotate(axis_normal, osg::Vec3(0, 0, 1));
 
-  std::vector<CgalPoint> roots(5, CgalPoint(0, std::numeric_limits<float>::max(), 0));
+  std::vector<CgalPoint> roots(5, CgalPoint(0, 0, std::numeric_limits<float>::max()));
+  std::vector<CgalPoint> real_roots(5);
   for (size_t i = 0; i < 5; ++ i)
   {
     std::vector<CgalPoint>& skeleton = p_ngbr->getStems()[i].getSkeleton();
@@ -392,22 +424,29 @@ void PointCloud::reorderOrgans(bool forward)
       osg::Vec3 point = Caster<CgalPoint, osg::Vec3>(skeleton[j]);
       point = transformation.preMult(point);
 
-      if (roots[i].y() > point.y())
+      if (roots[i].z() > point.z())
+      {
         roots[i] = Caster<osg::Vec3, CgalPoint>(point);
+        real_roots[i] = skeleton[j];
+      }
     }
   }
 
   for (size_t i = 0; i < 5; ++ i)
   {
     std::vector<CgalPoint>& skeleton = stems_[i].getSkeleton();
-    CgalPoint root(0, std::numeric_limits<float>::max(), 0);
+    CgalPoint root(0, 0, std::numeric_limits<float>::max());
+    size_t root_idx = 0;
     for (size_t j = 0, j_end = skeleton.size(); j < j_end; ++ j)
     {
       osg::Vec3 point = Caster<CgalPoint, osg::Vec3>(skeleton[j]);
       point = transformation.preMult(point);
 
-      if (root.y() > point.y())
+      if (root.z() > point.z())
+      {
         root = Caster<osg::Vec3, CgalPoint>(point);
+        root_idx = j;
+      }
     }
 
     double min_distance = std::numeric_limits<double>::max();
@@ -422,11 +461,185 @@ void PointCloud::reorderOrgans(bool forward)
       }
     }
     stems_[i].setId(p_ngbr->getStems()[min_idx].getId());
+
+    if (root.z() > roots[min_idx].z())
+    {
+      skeleton[root_idx] = real_roots[min_idx];
+    }
   }
 
   save(filename_);
 
   expire();
+
+  return;
+}
+
+void PointCloud::saveTetObj(void)
+{
+  MainWindow* main_window = MainWindow::getInstance();
+  QString filename = QFileDialog::getSaveFileName(main_window, "Save Tet Obj", main_window->getWorkspace(), "*.obj");
+  if (filename.isEmpty())
+    return;
+
+  QString mtl_filename = QFileInfo(filename).path()+"/"+QFileInfo(filename).baseName()+".mtl";
+  QFile mtl_file(mtl_filename);
+  mtl_file.open(QIODevice::WriteOnly | QIODevice::Text);
+  QTextStream mtl_file_stream(&mtl_file);
+
+  QFile obj_file(filename);
+  obj_file.open(QIODevice::WriteOnly | QIODevice::Text);
+  QTextStream obj_file_stream(&obj_file);
+  obj_file_stream << "mtllib " << mtl_filename << "\n";
+
+  for (size_t i = 0; i < plant_points_num_; ++ i)
+  {
+    PclRichPoint& point = at(i);
+    obj_file_stream << "v " << point.x << " " << point.y << " " << point.z << "\n";
+  }
+  obj_file_stream << "#vertices end\n\n";
+
+  for (size_t i = 0; i < plant_points_num_; ++ i)
+  {
+    PclRichPoint& point = at(i);
+    obj_file_stream << "vn " << point.normal_x << " " << point.normal_y << " " << point.normal_z << "\n";
+  }
+  obj_file_stream << "#normals end\n\n";
+
+  double triangle_length = ParameterManager::getInstance().getTriangleLength();
+  double triangle_length_threshold = triangle_length*triangle_length;
+
+  for (size_t i = 0, i_end = leaves_.size(); i < i_end; ++ i)
+  {
+    size_t id = leaves_[i].getId();
+
+    obj_file_stream << "usemtl leaf_" << i << "\n";
+    obj_file_stream << "g leaf_" << i << "\n";
+    int count = 0;
+    double r, g, b;
+    r = g = b = 0;
+    for (CGAL::Delaunay::Finite_facets_iterator it = triangulation_->finite_facets_begin();
+      it != triangulation_->finite_facets_end(); ++ it)
+    {
+      CGAL::Delaunay::Cell_handle cell_handle  = it->first;
+      int                   vertex_index = it->second;
+
+      bool this_leaf = true;
+      for (size_t i = 1; i < 4; ++ i)
+      {
+        int source_index = (vertex_index+i)%4;
+        size_t point_idx = cell_handle->vertex(source_index)->info();
+        if (at(point_idx).organ_id != id || at(point_idx).label != PclRichPoint::LABEL_LEAF)
+        {
+          this_leaf = false;
+          break;
+        }
+      }
+      if (!this_leaf)
+        continue;
+
+      bool small_polygon = true;
+      for (size_t i = 1; i < 4; ++ i)
+      {
+        int source_index = (vertex_index+i)%4;
+        int target_index = (i == 3)?((vertex_index+1)%4):((vertex_index+i+1)%4);
+
+        const CGAL::Delaunay::Point& source = cell_handle->vertex(source_index)->point();
+        const CGAL::Delaunay::Point& target = cell_handle->vertex(target_index)->point();
+        if (CGAL::squared_distance(source, target) > triangle_length_threshold)
+        {
+          small_polygon = false;
+          break;
+        }
+      }
+      if (!small_polygon)
+        continue;
+
+      obj_file_stream << "f ";
+      for (size_t i = 1; i < 4; ++ i)
+      {
+        int source_index = (vertex_index+i)%4;
+        size_t point_idx = cell_handle->vertex(source_index)->info();
+        obj_file_stream << point_idx+1 << "//" << point_idx+1 << " ";
+
+        r += at(point_idx).r;
+        g += at(point_idx).g;
+        b += at(point_idx).b;
+      }
+      count += 3;
+      obj_file_stream << "\n";
+    }
+
+    mtl_file_stream << "newmtl leaf_" << i << "\n";
+    count *= 255;
+    mtl_file_stream << "Kd " << r/count << " " << g/count << " " << b/count << "\n\n";
+  }
+
+  for (size_t i = 0, i_end = stems_.size(); i < i_end; ++ i)
+  {
+    size_t id = stems_[i].getId();
+
+    obj_file_stream << "usemtl stem_" << i << "\n";
+    obj_file_stream << "g stem_" << i << "\n";
+    int count = 0;
+    double r, g, b;
+    r = g = b = 0;
+    for (CGAL::Delaunay::Finite_facets_iterator it = triangulation_->finite_facets_begin();
+      it != triangulation_->finite_facets_end(); ++ it)
+    {
+      CGAL::Delaunay::Cell_handle cell_handle  = it->first;
+      int                   vertex_index = it->second;
+
+      bool this_stem = true;
+      for (size_t i = 1; i < 4; ++ i)
+      {
+        int source_index = (vertex_index+i)%4;
+        size_t point_idx = cell_handle->vertex(source_index)->info();
+        if (at(point_idx).organ_id != id || at(point_idx).label != PclRichPoint::LABEL_STEM)
+        {
+          this_stem = false;
+          break;
+        }
+      }
+      if (!this_stem)
+        continue;
+
+      bool small_polygon = true;
+      for (size_t i = 1; i < 4; ++ i)
+      {
+        int source_index = (vertex_index+i)%4;
+        int target_index = (i == 3)?((vertex_index+1)%4):((vertex_index+i+1)%4);
+
+        const CGAL::Delaunay::Point& source = cell_handle->vertex(source_index)->point();
+        const CGAL::Delaunay::Point& target = cell_handle->vertex(target_index)->point();
+        if (CGAL::squared_distance(source, target) > triangle_length_threshold)
+        {
+          small_polygon = false;
+          break;
+        }
+      }
+      if (!small_polygon)
+        continue;
+
+      obj_file_stream << "f ";
+      for (size_t i = 1; i < 4; ++ i)
+      {
+        int source_index = (vertex_index+i)%4;
+        size_t point_idx = cell_handle->vertex(source_index)->info();
+        obj_file_stream << point_idx+1 << "//" << point_idx+1 << " ";
+
+        r += at(point_idx).r;
+        g += at(point_idx).g;
+        b += at(point_idx).b;
+      }
+      count += 3;
+      obj_file_stream << "\n";
+    }
+
+    mtl_file_stream << "newmtl stem_" << i << "\n";
+    count *= 255;
+    mtl_file_stream << "Kd " << r/count << " " << g/count << " " << b/count << "\n\n";
+  }
 
   return;
 }

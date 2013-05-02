@@ -27,8 +27,8 @@ void PointCloud::sampleSkeletonPoints(void)
   boost::shared_ptr<std::vector<int> > point_indices(new std::vector<int>());
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
-    //if (at(i).label != PclRichPoint::LABEL_STEM)
-    //  continue;
+    if (at(i).label != PclRichPoint::LABEL_STEM)
+      continue;
     point_indices->push_back(i);
   }
   std::random_shuffle(point_indices->begin(), point_indices->end());
@@ -62,8 +62,8 @@ void PointCloud::sampleSkeletonPoints(void)
         double total_weight = 0.0;
         for (size_t j = 0; j < neighbor_num; ++ j)
         {
-          //if (at(indices[j]).label != PclRichPoint::LABEL_STEM)
-          //  continue;
+          if (at(indices[j]).label != PclRichPoint::LABEL_STEM)
+            continue;
           osg::Vec3 offset = at(indices[j]).cast<osg::Vec3>();
           double weight = std::exp(-distances[j]/std::pow(search_radius, 2.0));
           center = center + offset*weight;
@@ -327,6 +327,8 @@ void PointCloud::absoluteDetectStems(void)
 {
   QMutexLocker locker(&mutex_);
 
+  double stem_radius = ParameterManager::getInstance().getStemSkeletonRadius();
+
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
     if (at(i).label == PclRichPoint::LABEL_LEAF)
@@ -343,14 +345,20 @@ void PointCloud::absoluteDetectStems(void)
         min_organ = j;
       }
     }
-    stems_[min_organ].addPoint(i);
+    if (min_distance < stem_radius*stem_radius)
+      stems_[min_organ].addPoint(i);
+    else
+    {
+      at(i).organ_id = PclRichPoint::ID_UNINITIALIZED;
+      at(i).label = PclRichPoint::LABEL_NOISE;
+    }
   }
 
   locker.unlock();
-  trimOrgans(false);
+  //trimOrgans(false);
   locker.relock();
 
-  updateOrganFeature();
+  //updateOrganFeature();
 
   expire();
 

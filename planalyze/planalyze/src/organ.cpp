@@ -113,6 +113,39 @@ osg::Vec4 Organ::getColor(void) const
 
 void Organ::visualize(void)
 {
+  if (point_cloud_->getFrame() == 501)
+  {
+    std::vector<size_t> stems;
+    stems.push_back(3);
+    stems.push_back(2);
+    stems.push_back(7);
+    stems.push_back(9);
+    stems.push_back(6);
+
+    std::vector<size_t> leaves;
+    leaves.push_back(5);
+    leaves.push_back(2);
+    leaves.push_back(0);
+    leaves.push_back(3);
+    leaves.push_back(1);
+
+    if (is_leaf_)
+    {
+      osg::ref_ptr<osg::Vec3Array>  vertices = new osg::Vec3Array;
+      osg::ref_ptr<osg::Vec3Array>  normals = new osg::Vec3Array;
+      osg::ref_ptr<osg::Vec4Array>  colors = new osg::Vec4Array;
+
+      for (size_t i = 0, i_end = vertices->size(); i < i_end; ++ i)
+      {
+
+      }
+    }
+    else
+    {
+
+    }
+  }
+
   if (skeleton_.empty())
     return;
 
@@ -127,6 +160,35 @@ void Organ::visualize(void)
     osg::Vec3 target_center = Caster<CgalPoint, osg::Vec3>(skeleton_[i+1]);
     point_cloud_->addChild(OSGUtility::drawCylinder(source_center, target_center, 0.5, color));
   }
+
+  //osg::Vec3 pivot_point(-77.158821, 66.510941, 980.320374);
+  //osg::Vec3 axis_normal(-0.128121, -0.815076, -0.565009);
+  //osg::Matrix transformation = osg::Matrix::translate(-pivot_point)*osg::Matrix::rotate(axis_normal, osg::Vec3(0, 0, 1));
+
+  //for (size_t i = 0, i_end = skeleton_.size()-1; i < i_end; ++ i)
+  //{
+  //  osg::Vec3 source_center = Caster<CgalPoint, osg::Vec3>(skeleton_[i]);
+  //  osg::Vec3 target_center = Caster<CgalPoint, osg::Vec3>(skeleton_[i+1]);
+  //  source_center = transformation.preMult(source_center);
+  //  target_center = transformation.preMult(target_center);
+  //  point_cloud_->addChild(OSGUtility::drawCylinder(source_center, target_center, 0.5, color));
+  //}
+
+  //osg::Vec3 root(0, 0, std::numeric_limits<float>::max());
+  //CgalPoint real_root;
+  //for (size_t j = 0, j_end = skeleton_.size(); j < j_end; ++ j)
+  //{
+  //  osg::Vec3 point = Caster<CgalPoint, osg::Vec3>(skeleton_[j]);
+  //  point = transformation.preMult(point);
+
+  //  if (root.z() > point.z())
+  //  {
+  //    root = point;
+  //    real_root = skeleton_[j];
+  //  }
+  //}
+
+  //point_cloud_->addChild(OSGUtility::drawSphere(Caster<CgalPoint, osg::Vec3>(real_root), 1.0, color));
 
   return;
 }

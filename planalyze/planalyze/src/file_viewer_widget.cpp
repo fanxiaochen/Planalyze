@@ -73,24 +73,19 @@ void FileViewerWidget::contextMenuEvent(QContextMenuEvent *event)
   rendering_menu->addAction("Render Normals", point_cloud, SLOT(toggleRenderNormals()));
   rendering_menu->addAction("Render Normals", point_cloud, SLOT(toggleRenderOrientations()));
 
-  if (view != 12)
-    rendering_menu->addAction("Toggle Draggers", point_cloud, SLOT(toggleDraggers()));
-  else
-  {
-    rendering_menu->addAction("Inner Surface", point_cloud, SLOT(toggleRenderTriangles()));
-    rendering_menu->addAction("Primitive Nodes", point_cloud, SLOT(toggleRenderOrgans()));
-  }
+  rendering_menu->addAction("Toggle Draggers", point_cloud, SLOT(toggleDraggers()));
+  rendering_menu->addAction("Inner Surface", point_cloud, SLOT(toggleRenderTriangles()));
+  rendering_menu->addAction("Primitive Nodes", point_cloud, SLOT(toggleRenderOrgans()));
 
-  if (view != 12)
-    menu.addAction(QString("Mark as %1").arg(point_cloud->isRegistered()?("Unregistered"):("Registered")), point_cloud, SLOT(toggleRegisterState()));
-  else
-  {
-    QMenu* file_menu = menu.addMenu("File Load/Save");
-    file_menu->addAction("Save Organ Graph", point_cloud, SLOT(saveStatus()));
-    file_menu->addAction("Load Organ Graph", point_cloud, SLOT(loadStatus()));
-    file_menu->addAction("Save Point Cloud", point_cloud, SLOT(save()));
-    menu.addAction("Compute Registration", point_cloud, SLOT(registration()));
-  }
+  menu.addAction(QString("Mark as %1").arg(point_cloud->isRegistered()?("Unregistered"):("Registered")), point_cloud, SLOT(toggleRegisterState()));
+  QMenu* file_menu = menu.addMenu("File Load/Save");
+  file_menu->addAction("Save Organ Graph", point_cloud, SLOT(saveStatus()));
+  file_menu->addAction("Load Organ Graph", point_cloud, SLOT(loadStatus()));
+  file_menu->addAction("Save Point Cloud", point_cloud, SLOT(save()));
+  menu.addAction("Compute Registration", point_cloud, SLOT(registration()));
+
+  file_menu->addAction("Save Tets Obj", point_cloud, SLOT(saveTetObj()));
+
 
   menu.exec(event->globalPos());
 

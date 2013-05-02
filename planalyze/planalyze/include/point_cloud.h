@@ -183,6 +183,8 @@ public slots:
 
   void printOrgans(void);
 
+  void saveTetObj(void);
+
 protected:
   virtual void clearData();
   virtual void updateImpl();

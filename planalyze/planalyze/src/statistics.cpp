@@ -79,7 +79,7 @@ void Statistics::addStemSample(int id, int frame, double value)
   {
     QString title = QString("Stem %2").arg(id, 2, 10, QChar('0'));
     PlotCurve* plot_curve = new PlotCurve(title);
-    it = leaf_curves_.insert(std::make_pair(id, plot_curve)).first;
+    it = stem_curves_.insert(std::make_pair(id, plot_curve)).first;
     osg::Vec4 color = ColorMap::Instance().getColor(ColorMap::DISCRETE_KEY, id*2);
     it->second->setPen(QColor(color.r()*255, color.g()*255, color.b()*255), 2);
     it->second->attach(plot_);

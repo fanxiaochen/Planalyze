@@ -150,6 +150,17 @@ void SkeletonSketcher::jointSkeleton(osgViewer::View* view, const osgGA::GUIEven
     current_path_->clear();
   }
 
+  //if (current_path_->size() == 2)
+  //{
+  //  boost::SkeletonGraph& skeleton_graph = *skeleton_graph_;
+  //  boost::add_vertex(current_path_->at(0), skeleton_graph);
+  //  boost::add_vertex(current_path_->at(1), skeleton_graph);
+
+  //  boost::add_edge(boost::num_vertices(skeleton_graph)-1, boost::num_vertices(skeleton_graph)-2, skeleton_graph);
+
+  //  current_path_->clear();
+  //}
+
   expire();
 
   return;
