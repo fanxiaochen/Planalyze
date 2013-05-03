@@ -697,7 +697,7 @@ void FileSystemModel::getDisplayFirstFrameLastView(int& frame, int& view)
   for (size_t i = 1, i_end = display_items.size(); i < i_end; ++ i)
   {
     int this_frame = display_items[i].first;
-    if (this_frame > frame)
+    if (this_frame < frame)
       frame = this_frame;
   }
   for (size_t i = 1, i_end = display_items.size(); i < i_end; ++ i)
@@ -878,7 +878,7 @@ void FileSystemModel::setColorMode(int color_mode)
 void FileSystemModel::navigateToPreviousFrame(NavigationType type)
 {
   int first_frame, first_view;
-  getDisplayFirstFrameFirstView(first_frame, first_view);
+  getDisplayLastFrameLastView(first_frame, first_view);
 
   if (first_frame == -1 || first_view == -1)
   {
@@ -906,8 +906,10 @@ void FileSystemModel::navigateToPreviousFrame(NavigationType type)
 
 void FileSystemModel::navigateToNextFrame(NavigationType type)
 {
+  getPointCloud(501)->expire();
+
   int last_frame, last_view;
-  getDisplayLastFrameLastView(last_frame, last_view);
+  getDisplayFirstFrameLastView(last_frame, last_view);
 
   if (last_frame == -1 || last_view == -1)
   {
