@@ -490,14 +490,28 @@ void PointCloud::saveTetObj(void)
   QFile obj_file(filename);
   obj_file.open(QIODevice::WriteOnly | QIODevice::Text);
   QTextStream obj_file_stream(&obj_file);
-  obj_file_stream << "mtllib " << mtl_filename << "\n";
+  obj_file_stream << "mtllib " << QFileInfo(filename).baseName()+".mtl\n";
 
+  QString veg_filename = QFileInfo(filename).path()+"/"+QFileInfo(filename).baseName()+".veg";
+  QFile veg_file(veg_filename);
+  veg_file.open(QIODevice::WriteOnly | QIODevice::Text);
+  QTextStream veg_file_stream(&veg_file);
+
+  QString veg_mtl_filename = QFileInfo(filename).path()+"/"+QFileInfo(filename).baseName()+"_mtl.veg";
+  QFile veg_mtl_file(veg_mtl_filename);
+  veg_mtl_file.open(QIODevice::WriteOnly | QIODevice::Text);
+  QTextStream veg_mtl_file_stream(&veg_mtl_file);
+
+  veg_file_stream << "*VERTICES\n";
+  veg_file_stream << plant_points_num_ << " 3 0 0\n";
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
     PclRichPoint& point = at(i);
     obj_file_stream << "v " << point.x << " " << point.y << " " << point.z << "\n";
+    veg_file_stream << i+1 << " " << point.x << " " << point.y << " " << point.z << "\n";
   }
   obj_file_stream << "#vertices end\n\n";
+  veg_file_stream << "#vertices end\n\n";
 
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
@@ -508,6 +522,214 @@ void PointCloud::saveTetObj(void)
 
   double triangle_length = ParameterManager::getInstance().getTriangleLength();
   double triangle_length_threshold = triangle_length*triangle_length;
+
+  int count_tets = 0;
+  std::vector<std::vector<std::vector<int> > > leaf_tets;
+  for (size_t i = 0, i_end = leaves_.size(); i < i_end; ++ i)
+  {
+    size_t id = leaves_[i].getId();
+    leaf_tets.push_back(std::vector<std::vector<int> >());
+    std::vector<std::vector<int> >& tets = leaf_tets.back();
+    for (CGAL::Delaunay::Finite_cells_iterator it = triangulation_->finite_cells_begin();
+      it != triangulation_->finite_cells_end(); ++ it)
+    {
+      bool tets_of_this_organ = true;
+      for (size_t i = 0; i < 4; ++ i)
+      {
+        size_t point_idx = it->vertex(i)->info();
+        if (at(point_idx).organ_id != id || at(point_idx).label != PclRichPoint::LABEL_LEAF)
+        {
+          tets_of_this_organ = false;
+          break;
+        }
+      }
+      if (!tets_of_this_organ)
+        continue;
+
+      bool large_tetrahedron = false;
+      for (size_t i = 0; i < 4; ++ i)
+      {
+        for (size_t j = i+1; j < 4; ++ j)
+        {
+          const CGAL::Delaunay::Point& source = it->vertex(i)->point();
+          const CGAL::Delaunay::Point& target = it->vertex(j)->point();
+          if (CGAL::squared_distance(source, target) > triangle_length_threshold)
+          {
+            large_tetrahedron = true;
+            break;
+          }
+        }
+        if (large_tetrahedron)
+          break;
+      }
+
+      if (large_tetrahedron)
+        continue;
+
+      tets.push_back(std::vector<int>());
+      for (size_t i = 0; i < 4; ++ i)
+        tets.back().push_back(it->vertex(i)->info()+1);
+
+      const CGAL::Delaunay::Point& v0 = it->vertex(0)->point();
+      const CGAL::Delaunay::Point& v1 = it->vertex(1)->point();
+      const CGAL::Delaunay::Point& v2 = it->vertex(2)->point();
+      const CGAL::Delaunay::Point& v3 = it->vertex(3)->point();
+
+      if (CGAL::cross_product((v1-v0), (v2-v0))*(v3-v0) < 0)
+      {
+        std::cout << "error!" << std::endl;
+      }
+
+      count_tets ++;
+    }
+  }
+
+  std::vector<std::vector<std::vector<int> > > stem_tets;
+  for (size_t i = 0, i_end = stems_.size(); i < i_end; ++ i)
+  {
+    size_t id = stems_[i].getId();
+    stem_tets.push_back(std::vector<std::vector<int> >());
+    std::vector<std::vector<int> >& tets = stem_tets.back();
+    for (CGAL::Delaunay::Finite_cells_iterator it = triangulation_->finite_cells_begin();
+      it != triangulation_->finite_cells_end(); ++ it)
+    {
+      bool tets_of_this_organ = true;
+      for (size_t i = 0; i < 4; ++ i)
+      {
+        size_t point_idx = it->vertex(i)->info();
+        if (at(point_idx).organ_id != id || at(point_idx).label != PclRichPoint::LABEL_STEM)
+        {
+          tets_of_this_organ = false;
+          break;
+        }
+      }
+      if (!tets_of_this_organ)
+        continue;
+
+      bool large_tetrahedron = false;
+      for (size_t i = 0; i < 4; ++ i)
+      {
+        for (size_t j = i+1; j < 4; ++ j)
+        {
+          const CGAL::Delaunay::Point& source = it->vertex(i)->point();
+          const CGAL::Delaunay::Point& target = it->vertex(j)->point();
+          if (CGAL::squared_distance(source, target) > triangle_length_threshold)
+          {
+            large_tetrahedron = true;
+            break;
+          }
+        }
+        if (large_tetrahedron)
+          break;
+      }
+
+      if (large_tetrahedron)
+        continue;
+
+      tets.push_back(std::vector<int>());
+      for (size_t i = 0; i < 4; ++ i)
+        tets.back().push_back(it->vertex(i)->info()+1);
+
+      const CGAL::Delaunay::Point& v0 = it->vertex(0)->point();
+      const CGAL::Delaunay::Point& v1 = it->vertex(1)->point();
+      const CGAL::Delaunay::Point& v2 = it->vertex(2)->point();
+      const CGAL::Delaunay::Point& v3 = it->vertex(3)->point();
+
+      if (CGAL::cross_product((v1-v0), (v2-v0))*(v3-v0) < 0)
+      {
+        std::cout << "error!" << std::endl;
+      }
+
+      count_tets ++;
+    }
+  }
+  veg_file_stream << "*ELEMENTS\n";
+  veg_file_stream << "TET\n";
+  veg_file_stream << count_tets << " 4 0\n";
+  count_tets = 1;
+  for (size_t i = 0, i_end = leaf_tets.size(); i < i_end; ++ i)
+  {
+    std::vector<std::vector<int> >& tets = leaf_tets[i];
+    for (size_t j = 0, j_end = tets.size(); j < j_end; ++ j)
+    {
+      veg_file_stream << count_tets ++;
+      for (size_t k = 0; k < 4; ++ k)
+      {
+        veg_file_stream << " " << tets[j][k];
+      }
+      veg_file_stream << "\n";
+    }
+  }
+  for (size_t i = 0, i_end = stem_tets.size(); i < i_end; ++ i)
+  {
+    std::vector<std::vector<int> >& tets = stem_tets[i];
+    for (size_t j = 0, j_end = tets.size(); j < j_end; ++ j)
+    {
+      veg_file_stream << count_tets ++;
+      for (size_t k = 0; k < 4; ++ k)
+      {
+        veg_file_stream << " " << tets[j][k];
+      }
+      veg_file_stream << "\n";
+    }
+  }
+  veg_file_stream << "#elements end\n\n";
+
+  count_tets = 1;
+  for (size_t i = 0, i_end = leaf_tets.size(); i < i_end; ++ i)
+  {
+    std::vector<std::vector<int> >& tets = leaf_tets[i];
+    veg_file_stream << "*SET leaf_" << i << "\n";
+    for (size_t j = 0, j_end = tets.size(); j < j_end; ++ j)
+    {
+      veg_file_stream << count_tets ++ << ((j != j_end-1)?(", "):(""));
+      if (j%10 == 0 && j != 0)
+      {
+         veg_file_stream << "\n";
+      }
+    }
+    veg_file_stream << "\n";
+  }
+  for (size_t i = 0, i_end = stem_tets.size(); i < i_end; ++ i)
+  {
+    std::vector<std::vector<int> >& tets = stem_tets[i];
+    veg_file_stream << "*SET stem_" << i << "\n";
+    for (size_t j = 0, j_end = tets.size(); j < j_end; ++ j)
+    {
+      veg_file_stream << count_tets ++ << ((j != j_end-1)?(", "):(""));
+      if (j%10 == 0 && j != 0)
+      {
+        veg_file_stream << "\n";
+      }
+    }
+    veg_file_stream << "\n";
+  }
+  veg_file_stream << "#sets end\n\n";
+  veg_file_stream << "*INCLUDE " << QFileInfo(filename).baseName()+"_mtl.veg\n";
+
+  for (size_t i = 0, i_end = leaf_tets.size(); i < i_end; ++ i)
+  {
+    veg_mtl_file_stream << "*MATERIAL mtl_leaf_" << i << "\n";
+    veg_mtl_file_stream << "ENU, 1000, 1E8, 0.40\n\n";
+  }
+  for (size_t i = 0, i_end = stem_tets.size(); i < i_end; ++ i)
+  {
+    veg_mtl_file_stream << "*MATERIAL mtl_stem_" << i << "\n";
+    veg_mtl_file_stream << "ENU, 1000, 1E8, 0.40\n\n";
+  }
+  veg_mtl_file_stream << "#materials end\n\n";
+
+  for (size_t i = 0, i_end = leaf_tets.size(); i < i_end; ++ i)
+  {
+    veg_mtl_file_stream << "*REGION\n";
+    veg_mtl_file_stream << "leaf_" << i << ", " << "mtl_leaf_" << i << "\n\n";
+  }
+  for (size_t i = 0, i_end = stem_tets.size(); i < i_end; ++ i)
+  {
+    veg_mtl_file_stream << "*REGION\n";
+    veg_mtl_file_stream << "stem_" << i << ", " << "mtl_stem_" << i << "\n\n";
+  }
+  veg_mtl_file_stream << "#regions end\n\n";
 
   for (size_t i = 0, i_end = leaves_.size(); i < i_end; ++ i)
   {
