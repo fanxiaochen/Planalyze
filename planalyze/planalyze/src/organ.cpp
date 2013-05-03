@@ -19,6 +19,7 @@
 #include "osg_utility.h"
 #include "cgal_utility.h"
 #include "povray_visitor.h"
+#include "file_system_model.h"
 #include "parameter_manager.h"
 
 #include "organ.h"
@@ -56,6 +57,18 @@ Organ::Organ(PointCloud* point_cloud, QDomElement* element)
     skeleton_.push_back(CgalPoint(x, y, z));
     point_element = point_element.nextSiblingElement("Point");
   }
+
+  if (!skeleton_.empty())
+  {
+    osg::Vec3 pivot_point(-77.158821, 66.510941, 980.320374);
+    osg::Vec3 axis_normal(-0.128121, -0.815076, -0.565009);
+    osg::Matrix transformation = osg::Matrix::translate(-pivot_point)*osg::Matrix::rotate(axis_normal, osg::Vec3(0, 0, 1));
+    osg::Vec3 front = Caster<CgalPoint, osg::Vec3>(skeleton_.front());
+    osg::Vec3 back = Caster<CgalPoint, osg::Vec3>(skeleton_.back());
+    if (front.z() > back.z())
+      std::reverse(skeleton_.begin(), skeleton_.end());
+  }
+
 
   return;
 }
@@ -113,6 +126,8 @@ osg::Vec4 Organ::getColor(void) const
 
 void Organ::visualize(void)
 {
+  osg::Vec4 color = getColor();
+
   if (point_cloud_->getFrame() == 501)
   {
     std::vector<size_t> stems;
@@ -129,30 +144,97 @@ void Organ::visualize(void)
     leaves.push_back(3);
     leaves.push_back(1);
 
-    if (is_leaf_)
+    osg::ref_ptr<PointCloud> frame = MainWindow::getInstance()->getFileSystemModel()->getDisplayFirstFrame();
+    if (frame.valid() && frame->getFrame() != 501)
     {
-      osg::ref_ptr<osg::Vec3Array>  vertices = new osg::Vec3Array;
-      osg::ref_ptr<osg::Vec3Array>  normals = new osg::Vec3Array;
-      osg::ref_ptr<osg::Vec4Array>  colors = new osg::Vec4Array;
-
-      for (size_t i = 0, i_end = vertices->size(); i < i_end; ++ i)
+      if (is_leaf_)
       {
+        int idx = -1;
+        for (size_t i = 0; i < 5; ++ i)
+        {
+          if (id_ == leaves[i])
+          {
+            idx = i;
+            break;
+          }
+        }
 
+        osg::Matrix transform;
+
+        if (idx != -1)
+        {
+          std::vector<CgalPoint>& skeleton = frame->getStems()[idx].getSkeleton();
+          osg::Vec3 offset = Caster<CgalVector, osg::Vec3>(skeleton.back()-skeleton.front());
+          transform = osg::Matrix::translate(-offset);
+        }
+
+        osg::ref_ptr<osg::Vec3Array>  vertices = new osg::Vec3Array;
+        osg::ref_ptr<osg::Vec3Array>  normals = new osg::Vec3Array;
+        osg::ref_ptr<osg::Vec4Array>  colors = new osg::Vec4Array;
+
+        for (size_t i = 0, i_end = point_indices_.size(); i < i_end; ++ i)
+        {
+          const PclRichPoint& point = point_cloud_->at(point_indices_[i]);
+
+          vertices->push_back(osg::Vec3(point.x, point.y, point.z));
+
+          if (idx != -1)
+          {
+            vertices->back() = transform.preMult(vertices->back());
+          }
+
+          normals->push_back(osg::Vec3(point.normal_x, point.normal_y, point.normal_z));
+          colors->push_back(osg::Vec4(point.r/255.0, point.g/255.0, point.b/255.0, 1.0));
+        }
+
+        osg::Geode* geode = new osg::Geode;
+        osg::Geometry* geometry = new osg::Geometry;
+        geometry->setUseDisplayList(true);
+        geometry->setUseVertexBufferObjects(true);
+        geometry->setVertexData(osg::Geometry::ArrayData(vertices, osg::Geometry::BIND_PER_VERTEX));
+        geometry->setNormalData(osg::Geometry::ArrayData(normals, osg::Geometry::BIND_PER_VERTEX));
+        geometry->setColorData(osg::Geometry::ArrayData(colors, osg::Geometry::BIND_PER_VERTEX));
+        geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, vertices->size()));
+        geode->addDrawable(geometry);
+        point_cloud_->addChild(geode);
+      }
+      else
+      {
+        int idx = -1;
+        for (size_t i = 0; i < 5; ++ i)
+        {
+          if (id_ == stems[i])
+          {
+            idx = i;
+            break;
+          }
+        }
+        if (idx != -1)
+        {
+          std::vector<CgalPoint>& skeleton = frame->getStems()[idx].getSkeleton();
+          osg::Vec3 offset = Caster<CgalVector, osg::Vec3>(skeleton.back()-skeleton_.front());
+          osg::Matrix transform = osg::Matrix::translate(-offset);
+          for (size_t i = 0, i_end = skeleton.size()-1; i < i_end; ++ i)
+          {
+            osg::Vec3 source_center = Caster<CgalPoint, osg::Vec3>(skeleton[i]);
+            osg::Vec3 target_center = Caster<CgalPoint, osg::Vec3>(skeleton[i+1]);
+            source_center = transform.preMult(source_center);
+            target_center = transform.preMult(target_center);
+            point_cloud_->addChild(OSGUtility::drawCylinder(source_center, target_center, 0.5, color));
+          }
+        }
       }
     }
-    else
-    {
-
-    }
   }
+
+  return;
+
 
   if (skeleton_.empty())
     return;
 
   if (is_leaf_)
     return;
-
-  osg::Vec4 color = getColor();
 
   for (size_t i = 0, i_end = skeleton_.size()-1; i < i_end; ++ i)
   {

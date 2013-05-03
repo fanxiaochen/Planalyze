@@ -22,29 +22,29 @@
 
 void PointCloud::fillOrganPoints(void)
 {
-  if (stems_.empty() || leaves_.empty())
-  {
-    int stem_num = 0;
-    int leaf_num = 0;
-    for (size_t i = 0; i < plant_points_num_; ++ i)
-    {
-      int organ_id = at(i).organ_id;
-      if (organ_id == PclRichPoint::ID_UNINITIALIZED)
-        continue;
+  //if (stems_.empty() || leaves_.empty())
+  //{
+  //  int stem_num = 0;
+  //  int leaf_num = 0;
+  //  for (size_t i = 0; i < plant_points_num_; ++ i)
+  //  {
+  //    int organ_id = at(i).organ_id;
+  //    if (organ_id == PclRichPoint::ID_UNINITIALIZED)
+  //      continue;
 
-      int label = at(i).label;
-      if (label == PclRichPoint::LABEL_LEAF)
-        leaf_num = std::max(organ_id, leaf_num);
-      else if (label == PclRichPoint::LABEL_STEM && organ_id < stems_.size())
-        stem_num = std::max(organ_id, stem_num);
-    }
-    stems_.clear();
-    for (size_t i = 0; i < stem_num+1; ++ i)
-      stems_.push_back(Organ(this, i, false));
-    leaves_.clear();
-    for (size_t i = 0; i < leaf_num+1; ++ i)
-      leaves_.push_back(Organ(this, i, true));
-  }
+  //    int label = at(i).label;
+  //    if (label == PclRichPoint::LABEL_LEAF)
+  //      leaf_num = std::max(organ_id, leaf_num);
+  //    else if (label == PclRichPoint::LABEL_STEM && organ_id < stems_.size())
+  //      stem_num = std::max(organ_id, stem_num);
+  //  }
+  //  stems_.clear();
+  //  for (size_t i = 0; i < stem_num+1; ++ i)
+  //    stems_.push_back(Organ(this, i, false));
+  //  leaves_.clear();
+  //  for (size_t i = 0; i < leaf_num+1; ++ i)
+  //    leaves_.push_back(Organ(this, i, true));
+  //}
 
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
