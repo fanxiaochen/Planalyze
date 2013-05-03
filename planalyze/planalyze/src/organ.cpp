@@ -131,17 +131,17 @@ void Organ::visualize(void)
   if (point_cloud_->getFrame() == 501)
   {
     std::vector<size_t> stems;
-    stems.push_back(3);
-    stems.push_back(2);
-    stems.push_back(7);
     stems.push_back(9);
+    stems.push_back(7);
+    stems.push_back(2);
+    stems.push_back(3);
     stems.push_back(6);
 
     std::vector<size_t> leaves;
-    leaves.push_back(5);
-    leaves.push_back(2);
-    leaves.push_back(0);
     leaves.push_back(3);
+    leaves.push_back(0);
+    leaves.push_back(2);
+    leaves.push_back(5);
     leaves.push_back(1);
 
     osg::ref_ptr<PointCloud> frame = MainWindow::getInstance()->getFileSystemModel()->getDisplayFirstFrame();
@@ -150,11 +150,13 @@ void Organ::visualize(void)
       if (is_leaf_)
       {
         int idx = -1;
+        int stem_idx = -1;
         for (size_t i = 0; i < 5; ++ i)
         {
           if (id_ == leaves[i])
           {
             idx = i;
+            stem_idx = stems[i];
             break;
           }
         }
@@ -163,9 +165,67 @@ void Organ::visualize(void)
 
         if (idx != -1)
         {
-          std::vector<CgalPoint>& skeleton = frame->getStems()[idx].getSkeleton();
-          osg::Vec3 offset = Caster<CgalVector, osg::Vec3>(skeleton.back()-skeleton.front());
-          transform = osg::Matrix::translate(-offset);
+          std::vector<CgalPoint>& source_skeleton = frame->getStems()[idx].getSkeleton();
+          osg::Vec3 source_vector(0.0, 0.0, 0.0);
+          double length_threshold = 8;
+          int count = 0;
+          double length = 0;
+          for (int i = 0, i_end = source_skeleton.size(); i < i_end-1; ++i)
+          {
+            source_vector = source_vector + Caster<CgalVector, osg::Vec3>(source_skeleton[i+1]-source_skeleton[i]);
+            count ++;
+            length += std::sqrt(CGAL::squared_distance(source_skeleton[i+1], source_skeleton[i]));
+            if (length > length_threshold)
+              break;
+          }
+          source_vector = source_vector/count;
+
+          std::vector<CgalPoint>& target_skeleton = point_cloud_->getStems()[stem_idx].getSkeleton();
+          osg::Vec3 target_vector(0.0, 0.0, 0.0);
+          count = 0;
+          length = 0;
+          for (int i = 0, i_end = target_skeleton.size(); i < i_end-1; ++i)
+          {
+            target_vector = target_vector + Caster<CgalVector, osg::Vec3>(target_skeleton[i+1]-target_skeleton[i]);
+            count ++;
+            length += std::sqrt(CGAL::squared_distance(target_skeleton[i+1], target_skeleton[i]));
+            if (length > length_threshold)
+              break;
+          }
+          target_vector = target_vector/count;
+
+          //{
+            osg::Vec3 ssource_vector(0.0, 0.0, 0.0);
+            count = 0;
+            length = 0;
+            for (int i = source_skeleton.size()-1; i > 0; i--)
+            {
+              ssource_vector = ssource_vector + Caster<CgalVector, osg::Vec3>(source_skeleton[i]-source_skeleton[i-1]);
+              count ++;
+              length += std::sqrt(CGAL::squared_distance(source_skeleton[i], source_skeleton[i-1]));
+              if (length > length_threshold)
+                break;
+            }
+            source_vector = source_vector/count;
+
+            osg::Vec3 ttarget_vector(0.0, 0.0, 0.0);
+            count = 0;
+            length = 0;
+            for (int i = 0, i_end = target_skeleton.size(); i < i_end-1; ++i)
+            {
+              ttarget_vector = ttarget_vector + Caster<CgalVector, osg::Vec3>(target_skeleton[i+1]-target_skeleton[i]);
+              count ++;
+              length += std::sqrt(CGAL::squared_distance(target_skeleton[i+1], target_skeleton[i]));
+              if (length > length_threshold)
+                break;
+            }
+            ttarget_vector = ttarget_vector/count;
+          //}
+
+          osg::Vec3 offset = Caster<CgalVector, osg::Vec3>(source_skeleton.front()-source_skeleton.back());
+          offset = osg::Matrix::rotate(ssource_vector, ttarget_vector).preMult(offset);
+          osg::Vec3 end_point = Caster<CgalPoint, osg::Vec3>(target_skeleton.front());
+          transform = osg::Matrix::translate(-end_point)*osg::Matrix::rotate(target_vector, source_vector)*osg::Matrix::translate(end_point)*osg::Matrix::translate(offset);
         }
 
         osg::ref_ptr<osg::Vec3Array>  vertices = new osg::Vec3Array;
@@ -212,23 +272,49 @@ void Organ::visualize(void)
         if (idx != -1)
         {
           std::vector<CgalPoint>& skeleton = frame->getStems()[idx].getSkeleton();
-          osg::Vec3 offset = Caster<CgalVector, osg::Vec3>(skeleton.back()-skeleton_.front());
-          osg::Matrix transform = osg::Matrix::translate(-offset);
+          osg::Vec3 source_vector(0.0, 0.0, 0.0);
+          double length_threshold = 8;
+          int count = 0;
+          double length = 0;
+          for (int i = skeleton.size()-1; i > 0; i--)
+          {
+            source_vector = source_vector + Caster<CgalVector, osg::Vec3>(skeleton[i]-skeleton[i-1]);
+            count ++;
+            length += std::sqrt(CGAL::squared_distance(skeleton[i], skeleton[i-1]));
+            if (length > length_threshold)
+              break;
+          }
+          source_vector = source_vector/count;
+
+          osg::Vec3 target_vector(0.0, 0.0, 0.0);
+          count = 0;
+          length = 0;
+          for (int i = 0, i_end = skeleton_.size(); i < i_end-1; ++i)
+          {
+            target_vector = target_vector + Caster<CgalVector, osg::Vec3>(skeleton_[i+1]-skeleton_[i]);
+            count ++;
+            length += std::sqrt(CGAL::squared_distance(skeleton_[i+1], skeleton_[i]));
+            if (length > length_threshold)
+              break;
+          }
+          target_vector = target_vector/count;
+
+          osg::Vec3 offset1 = Caster<CgalPoint, osg::Vec3>(skeleton.back());
+          osg::Vec3 offset2 = Caster<CgalPoint, osg::Vec3>(skeleton_.front());
+          osg::Matrix transform = osg::Matrix::translate(-offset1)*osg::Matrix::rotate(source_vector, target_vector)*osg::Matrix::translate(offset2);
+
           for (size_t i = 0, i_end = skeleton.size()-1; i < i_end; ++ i)
           {
             osg::Vec3 source_center = Caster<CgalPoint, osg::Vec3>(skeleton[i]);
             osg::Vec3 target_center = Caster<CgalPoint, osg::Vec3>(skeleton[i+1]);
             source_center = transform.preMult(source_center);
             target_center = transform.preMult(target_center);
-            point_cloud_->addChild(OSGUtility::drawCylinder(source_center, target_center, 0.5, color));
+            point_cloud_->addChild(OSGUtility::drawCylinder(source_center, target_center, 3, color));
           }
         }
       }
     }
   }
-
-  return;
-
 
   if (skeleton_.empty())
     return;
@@ -240,7 +326,7 @@ void Organ::visualize(void)
   {
     osg::Vec3 source_center = Caster<CgalPoint, osg::Vec3>(skeleton_[i]);
     osg::Vec3 target_center = Caster<CgalPoint, osg::Vec3>(skeleton_[i+1]);
-    point_cloud_->addChild(OSGUtility::drawCylinder(source_center, target_center, 0.5, color));
+    point_cloud_->addChild(OSGUtility::drawCylinder(source_center, target_center, 3, color));
   }
 
   //osg::Vec3 pivot_point(-77.158821, 66.510941, 980.320374);

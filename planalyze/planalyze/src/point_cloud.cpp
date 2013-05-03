@@ -227,6 +227,9 @@ void PointCloud::clearData()
 
 void PointCloud::visualizePoints(size_t start, size_t end)
 {
+  if (getFrame() == 501)
+    return;
+
   osg::ref_ptr<osg::Vec3Array>  vertices = new osg::Vec3Array;
   osg::ref_ptr<osg::Vec3Array>  normals_vertices = new osg::Vec3Array;
   osg::ref_ptr<osg::Vec3Array>  orientations_vertices = new osg::Vec3Array;
