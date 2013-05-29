@@ -92,6 +92,8 @@ void PointCloud::collectStems(void)
   }
 
   stems_ = result_stems;
+  for (size_t i = 0, i_end = stems_.size(); i < i_end; ++ i)
+    stems_[i].updateFeature();
 
   return;
 }
@@ -119,7 +121,7 @@ void PointCloud::smoothStems(double smooth_cost, bool forward)
   std::vector<size_t> site_indices;
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
-    if (at(i).label != PclRichPoint::LABEL_STEM)
+    if (at(i).label == PclRichPoint::LABEL_LEAF)
       continue;
     inverse_indices[i] = site_indices.size();
     site_indices.push_back(i);
@@ -148,8 +150,10 @@ void PointCloud::smoothStems(double smooth_cost, bool forward)
         continue;
       }
 
-      CgalVector organ_orientation = stems_ngbr[j].getOrientation();
-      int orientation_cost = (distance/distance_threshold+(point_orientation-organ_orientation).squared_length())*cost_scale;
+      //CgalVector organ_orientation = stems_ngbr[j].getOrientation();
+      //int orientation_cost = (distance/distance_threshold+(point_orientation-organ_orientation).squared_length())*cost_scale;
+
+      int orientation_cost = distance;
       gco->setDataCost(i, j, orientation_cost);
     }
 
@@ -170,12 +174,15 @@ void PointCloud::smoothStems(double smooth_cost, bool forward)
   collectStems();
 
   locker.unlock();
-  trimOrgans(false);
+  //trimOrgans(false);
   locker.relock();
 
   locker.unlock();
-  extendStems();
+  //extendStems();
   locker.relock();
+
+  save(filename_);
+  saveStatus();
 
   expire();
 

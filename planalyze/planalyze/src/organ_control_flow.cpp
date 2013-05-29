@@ -22,29 +22,26 @@
 
 void PointCloud::fillOrganPoints(void)
 {
-  //if (stems_.empty() || leaves_.empty())
-  //{
-  //  int stem_num = 0;
-  //  int leaf_num = 0;
-  //  for (size_t i = 0; i < plant_points_num_; ++ i)
-  //  {
-  //    int organ_id = at(i).organ_id;
-  //    if (organ_id == PclRichPoint::ID_UNINITIALIZED)
-  //      continue;
+    //int stem_num = 0;
+    //int leaf_num = 0;
+    //for (size_t i = 0; i < plant_points_num_; ++ i)
+    //{
+    //  int organ_id = at(i).organ_id;
+    //  if (organ_id == PclRichPoint::ID_UNINITIALIZED)
+    //    continue;
 
-  //    int label = at(i).label;
-  //    if (label == PclRichPoint::LABEL_LEAF)
-  //      leaf_num = std::max(organ_id, leaf_num);
-  //    else if (label == PclRichPoint::LABEL_STEM && organ_id < stems_.size())
-  //      stem_num = std::max(organ_id, stem_num);
-  //  }
-  //  stems_.clear();
-  //  for (size_t i = 0; i < stem_num+1; ++ i)
-  //    stems_.push_back(Organ(this, i, false));
-  //  leaves_.clear();
-  //  for (size_t i = 0; i < leaf_num+1; ++ i)
-  //    leaves_.push_back(Organ(this, i, true));
-  //}
+    //  int label = at(i).label;
+    //  if (label == PclRichPoint::LABEL_LEAF)
+    //    leaf_num = std::max(organ_id, leaf_num);
+    //  else if (label == PclRichPoint::LABEL_STEM && organ_id < stems_.size())
+    //    stem_num = std::max(organ_id, stem_num);
+    //}
+    //stems_.clear();
+    //for (size_t i = 0; i < stem_num+1; ++ i)
+    //  stems_.push_back(Organ(this, i, false));
+    //leaves_.clear();
+    //for (size_t i = 0; i < leaf_num+1; ++ i)
+    //  leaves_.push_back(Organ(this, i, true));
 
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
@@ -61,11 +58,31 @@ void PointCloud::fillOrganPoints(void)
 
   //updateOrganFeature();
 
+  //std::vector<Organ> stems;
+  //for (size_t i = 0; i < stems_.size(); i ++)
+  //{
+  //  if (stems_[i].getSkeleton().empty())
+  //    continue;
+  //  stems.push_back(stems_[i]);
+  //}
+  //stems_ = stems;
+  //for (size_t i = 0; i < stems_.size(); i ++)
+  //{
+  //  stems_[i].setId(i);
+  //}
+
+  //save(filename_);
+  //saveStatus();
+
   return;
 }
 
 double PointCloud::computePointKdTreeDistanceL2(const PclRichPoint& point, KdTreePtr kdtree)
 {
+  if (kdtree.get() == NULL)
+  {
+    return 100000000;
+  }
   std::vector<int> neighbor_indices(1);
   std::vector<float> neighbor_squared_distances(1);
   int neighbor_num = kdtree->nearestKSearch(point, 1, neighbor_indices, neighbor_squared_distances);
@@ -75,6 +92,10 @@ double PointCloud::computePointKdTreeDistanceL2(const PclRichPoint& point, KdTre
 
 double PointCloud::computeOrganKdTreeDistance(Organ& organ, KdTreePtr kdtree)
 {
+  if (kdtree.get() == NULL)
+  {
+    return 1000000;
+  }
   double average_distance = 0.0;
   const std::vector<int>& indices = organ.getPointIndices();
   for (size_t i = 0, i_end = indices.size(); i < i_end; ++ i)
@@ -85,6 +106,46 @@ double PointCloud::computeOrganKdTreeDistance(Organ& organ, KdTreePtr kdtree)
   average_distance /= indices.size();
 
   return average_distance;
+}
+
+double PointCloud::computeStemDistance(Organ& stem1, Organ& stem2)
+{
+  if (stem1.getSkeleton().empty() || stem2.getSkeleton().empty())
+  {
+    return 1000000;
+  }
+
+
+  double final_distance = 0.0;
+  for (size_t i = 0; i < stem1.getSkeleton().size(); i ++)
+  {
+    double min_distance = std::numeric_limits<double>::max();
+    for (size_t j = 0; j < stem2.getSkeleton().size(); j ++)
+    {
+      double distance = CGAL::squared_distance(stem1.getSkeleton()[i], stem2.getSkeleton()[j]);
+      if (min_distance > distance)
+      {
+        min_distance = distance;
+      }
+    }
+    final_distance += min_distance;
+  }
+
+  for (size_t i = 0; i < stem2.getSkeleton().size(); i ++)
+  {
+    double min_distance = std::numeric_limits<double>::max();
+    for (size_t j = 0; j < stem1.getSkeleton().size(); j ++)
+    {
+      double distance = CGAL::squared_distance(stem1.getSkeleton()[j], stem2.getSkeleton()[i]);
+      if (min_distance > distance)
+      {
+        min_distance = distance;
+      }
+    }
+    final_distance += min_distance;
+  }
+
+  return final_distance/(stem1.getSkeleton().size()+stem2.getSkeleton().size());
 }
 
 PointCloud::KdTreePtr PointCloud::getStemKdTree(int id) const
@@ -126,6 +187,7 @@ PointCloud::KdTreePtr PointCloud::getOrganKdTree(int id, bool leaf) const
   if (organ == NULL)
   {
     std::cout << "frame: " << getFrame() << "\tgetOrganKdTree: error id > num !" << std::endl;
+    assert(false);
     return KdTreePtr((pcl::KdTreeFLANN<PclRichPoint>*)(NULL));
   }
 
@@ -410,63 +472,115 @@ void PointCloud::reorderOrgans(bool forward)
   //  }
   //}
 
-  osg::Vec3 pivot_point(-77.158821, 66.510941, 980.320374);
-  osg::Vec3 axis_normal(-0.128121, -0.815076, -0.565009);
-  osg::Matrix transformation = osg::Matrix::translate(-pivot_point)*osg::Matrix::rotate(axis_normal, osg::Vec3(0, 0, 1));
+  std::vector<int> mapping;
+  std::vector<double> distances;
 
-  std::vector<CgalPoint> roots(5, CgalPoint(0, 0, std::numeric_limits<float>::max()));
-  std::vector<CgalPoint> real_roots(5);
-  for (size_t i = 0; i < 5; ++ i)
   {
-    std::vector<CgalPoint>& skeleton = p_ngbr->getStems()[i].getSkeleton();
-    for (size_t j = 0, j_end = skeleton.size(); j < j_end; ++ j)
+    size_t stem_num = getStemNum();
+    size_t stem_num_ngbr = p_ngbr->getStemNum();
+    if (stem_num_ngbr != 0 && stem_num != 0)
     {
-      osg::Vec3 point = Caster<CgalPoint, osg::Vec3>(skeleton[j]);
-      point = transformation.preMult(point);
+      mapping.assign(stem_num_ngbr, -1);
+      distances.assign(stem_num_ngbr, std::numeric_limits<double>::max());
 
-      if (roots[i].z() > point.z())
+      for (size_t i = 0; i < stem_num_ngbr; ++ i)
       {
-        roots[i] = Caster<osg::Vec3, CgalPoint>(point);
-        real_roots[i] = skeleton[j];
+        double distance_min = std::numeric_limits<double>::max();
+        size_t idx_min = 0;
+        for (size_t j = 0; j < stem_num; ++ j)
+        {
+          double distance = computeStemDistance(stems_[j], p_ngbr->getStems()[i]);
+          if (distance_min > distance)
+          {
+            distance_min = distance;
+            idx_min = j;
+          }
+        }
+
+        if (mapping[i] == -1 || distances[i] > distance_min)
+        {
+          mapping[i] = idx_min;
+          distances[i] = distance_min;
+        }
+      }
+
+      std::vector<bool> indices(stem_num, true);
+      size_t max_id = 0;
+      for (size_t i = 0; i < stem_num_ngbr; ++ i)
+      {
+        stems_[mapping[i]].setId(p_ngbr->getStems()[i].getId());
+        indices[mapping[i]] = false;
+        max_id = std::max(max_id, p_ngbr->getStems()[i].getId());
+        std::cout << mapping[i] << "->" << p_ngbr->getStems()[i].getId() << std::endl;
+      }
+      std::cout << std::endl;
+
+      for (size_t i = 0; i < stem_num; ++ i)
+      {
+        if (indices[i] == false)
+          continue;
+        stems_[i].setId(++max_id);
       }
     }
   }
 
-  for (size_t i = 0; i < 5; ++ i)
-  {
-    std::vector<CgalPoint>& skeleton = stems_[i].getSkeleton();
-    CgalPoint root(0, 0, std::numeric_limits<float>::max());
-    size_t root_idx = 0;
-    for (size_t j = 0, j_end = skeleton.size(); j < j_end; ++ j)
-    {
-      osg::Vec3 point = Caster<CgalPoint, osg::Vec3>(skeleton[j]);
-      point = transformation.preMult(point);
+  //osg::Vec3 pivot_point(-77.158821, 66.510941, 980.320374);
+  //osg::Vec3 axis_normal(-0.128121, -0.815076, -0.565009);
+  //osg::Matrix transformation = osg::Matrix::translate(-pivot_point)*osg::Matrix::rotate(axis_normal, osg::Vec3(0, 0, 1));
 
-      if (root.z() > point.z())
-      {
-        root = Caster<osg::Vec3, CgalPoint>(point);
-        root_idx = j;
-      }
-    }
+  //std::vector<CgalPoint> roots(5, CgalPoint(0, 0, std::numeric_limits<float>::max()));
+  //std::vector<CgalPoint> real_roots(5);
+  //for (size_t i = 0; i < 5; ++ i)
+  //{
+  //  std::vector<CgalPoint>& skeleton = p_ngbr->getStems()[i].getSkeleton();
+  //  for (size_t j = 0, j_end = skeleton.size(); j < j_end; ++ j)
+  //  {
+  //    osg::Vec3 point = Caster<CgalPoint, osg::Vec3>(skeleton[j]);
+  //    point = transformation.preMult(point);
 
-    double min_distance = std::numeric_limits<double>::max();
-    size_t min_idx = 0;
-    for (size_t j = 0; j < 5; ++ j)
-    {
-      double distance = CGAL::squared_distance(root, roots[j]);
-      if (min_distance > distance)
-      {
-        min_distance = distance;
-        min_idx = j;
-      }
-    }
-    stems_[i].setId(p_ngbr->getStems()[min_idx].getId());
+  //    if (roots[i].z() > point.z())
+  //    {
+  //      roots[i] = Caster<osg::Vec3, CgalPoint>(point);
+  //      real_roots[i] = skeleton[j];
+  //    }
+  //  }
+  //}
 
-    if (root.z() > roots[min_idx].z())
-    {
-      skeleton[root_idx] = real_roots[min_idx];
-    }
-  }
+  //for (size_t i = 0; i < 5; ++ i)
+  //{
+  //  std::vector<CgalPoint>& skeleton = stems_[i].getSkeleton();
+  //  CgalPoint root(0, 0, std::numeric_limits<float>::max());
+  //  size_t root_idx = 0;
+  //  for (size_t j = 0, j_end = skeleton.size(); j < j_end; ++ j)
+  //  {
+  //    osg::Vec3 point = Caster<CgalPoint, osg::Vec3>(skeleton[j]);
+  //    point = transformation.preMult(point);
+
+  //    if (root.z() > point.z())
+  //    {
+  //      root = Caster<osg::Vec3, CgalPoint>(point);
+  //      root_idx = j;
+  //    }
+  //  }
+
+  //  double min_distance = std::numeric_limits<double>::max();
+  //  size_t min_idx = 0;
+  //  for (size_t j = 0; j < 5; ++ j)
+  //  {
+  //    double distance = CGAL::squared_distance(root, roots[j]);
+  //    if (min_distance > distance)
+  //    {
+  //      min_distance = distance;
+  //      min_idx = j;
+  //    }
+  //  }
+  //  stems_[i].setId(p_ngbr->getStems()[min_idx].getId());
+
+  //  if (root.z() > roots[min_idx].z())
+  //  {
+  //    skeleton[root_idx] = real_roots[min_idx];
+  //  }
+  //}
 
   save(filename_);
 

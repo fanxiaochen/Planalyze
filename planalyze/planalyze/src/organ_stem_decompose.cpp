@@ -27,8 +27,9 @@ void PointCloud::sampleSkeletonPoints(void)
   boost::shared_ptr<std::vector<int> > point_indices(new std::vector<int>());
   for (size_t i = 0; i < plant_points_num_; ++ i)
   {
-    if (at(i).label != PclRichPoint::LABEL_STEM)
+    if (at(i).label == PclRichPoint::LABEL_LEAF)
       continue;
+    at(i).label = PclRichPoint::LABEL_STEM;
     point_indices->push_back(i);
   }
   std::random_shuffle(point_indices->begin(), point_indices->end());
@@ -62,7 +63,7 @@ void PointCloud::sampleSkeletonPoints(void)
         double total_weight = 0.0;
         for (size_t j = 0; j < neighbor_num; ++ j)
         {
-          if (at(indices[j]).label != PclRichPoint::LABEL_STEM)
+          if (at(indices[j]).label == PclRichPoint::LABEL_LEAF)
             continue;
           osg::Vec3 offset = at(indices[j]).cast<osg::Vec3>();
           double weight = std::exp(-distances[j]/std::pow(search_radius, 2.0));
@@ -355,8 +356,11 @@ void PointCloud::absoluteDetectStems(void)
   }
 
   locker.unlock();
-  //trimOrgans(false);
+  trimOrgans(false);
   locker.relock();
+
+  save(filename_);
+  saveStatus();
 
   //updateOrganFeature();
 

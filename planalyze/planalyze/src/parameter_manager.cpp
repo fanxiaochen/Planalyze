@@ -42,7 +42,7 @@ ParameterManager::ParameterManager(void)
   stem_skeleton_radius_(new DoubleParameter("Stem Skeleton Radius", "Stem Skeleton Radius", 3.5, 0.5, 16, 0.5)),
   stem_length_threshold_(new DoubleParameter("Stem Skeleton Length", "Stem Skeleton Length", 3, 0.5, 32, 0.5)),
   curvature_quantize_(new DoubleParameter("Curvature Quantize", "Threshold Quantize", 0.0015, 0.00001, 0.1, 0.00001)),
-  triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 2.5, 1.0, 8.0, 0.1)),
+  triangle_length_(new DoubleParameter("Triangle Length", "Triangle Length", 2.5, 1.0, 32.0, 0.1)),
   radius_(new IntParameter("Radius", "Radius", 500, 500, 1000, 1)),
   times_(new IntParameter("Times", "Times", 5, 1, 100)),
   is_using_pot_(new BoolParameter("Pot or Not", "Pot or Not", true))
