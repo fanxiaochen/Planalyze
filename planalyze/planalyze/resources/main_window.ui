@@ -60,6 +60,7 @@
     <addaction name="separator"/>
     <addaction name="actionLoadCamera"/>
     <addaction name="actionSaveCamera"/>
+    <addaction name="actionUpdateObjIndex"/>
    </widget>
    <widget class="QMenu" name="menuPointCloud">
     <property name="title">
@@ -554,6 +555,11 @@
   <action name="actionBReorderOrgans">
    <property name="text">
     <string>BReorder Organs</string>
+   </property>
+  </action>
+  <action name="actionUpdateObjIndex">
+   <property name="text">
+    <string>Update Obj Index</string>
    </property>
   </action>
  </widget>

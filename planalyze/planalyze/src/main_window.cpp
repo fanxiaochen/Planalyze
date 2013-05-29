@@ -94,6 +94,8 @@ MainWindow::MainWindow(void)
 
   connect(image_grabber_, SIGNAL(timeToView(int, int)), this, SLOT(viewImage(int, int)));
 
+  connect(ui_.actionUpdateObjIndex, SIGNAL(triggered(void)), this, SLOT(updateObjIndex(void)));
+
   image_grabber_->moveToThread(&grabber_thread_);
   grabber_thread_.start();
 }
@@ -757,6 +759,42 @@ void MainWindow::viewImage(int view, int stripe)
   }
 
   image_viewer_->setPixmap(QPixmap::fromImage(q_image));
+
+  return;
+}
+
+void MainWindow::updateObjIndex(void)
+{
+  QString filename = QFileDialog::getOpenFileName(this, "Load Obj File", workspace_, "Obj File (*.obj)");
+  if (filename.isEmpty())
+    return;
+
+  QString obj_filename = QFileInfo(filename).path()+"/"+QFileInfo(filename).baseName()+"_update.obj";
+  QFile obj_file(obj_filename);
+  obj_file.open(QIODevice::WriteOnly | QIODevice::Text);
+  QTextStream obj_file_stream(&obj_file);
+
+  std::ifstream fin(filename.toStdString());
+  char c;
+  int v_idx_1, vn_idx_1, v_idx_2, vn_idx_2, v_idx_3, vn_idx_3;
+  std::string line;
+  int offset = 47264;
+  while (std::getline(fin, line))
+  {
+    std::stringstream ss(line);
+    ss >> c >> v_idx_1 >> c >> c >> vn_idx_1
+      >> v_idx_2 >> c >> c >> vn_idx_2 
+      >> v_idx_3 >> c >> c >> vn_idx_3;
+    v_idx_1 += offset;
+    vn_idx_1 += offset;
+    v_idx_2 += offset;
+    vn_idx_2 += offset;
+    v_idx_3 += offset;
+    vn_idx_3 += offset;
+    obj_file_stream << "f " << v_idx_1 << "//" << vn_idx_1
+      << " " << v_idx_2 << "//" << vn_idx_2
+      << " " << v_idx_3 << "//" << vn_idx_3 << "\n";
+  }
 
   return;
 }

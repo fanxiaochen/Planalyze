@@ -1,3 +1,4 @@
+
 #pragma once
 #ifndef MainWindow_H
 #define MainWindow_H
@@ -76,6 +77,7 @@ public slots:
   void saveParameters(void);
 
   void saveCaptureParameters(void);
+  void updateObjIndex(void);
 
 protected:
   virtual void timerEvent(QTimerEvent *event);
