@@ -113,6 +113,7 @@ public:
   KdTreePtr getStemKdTree(int id) const;
   static double computePointKdTreeDistanceL2(const PclRichPoint& point, KdTreePtr kdtree);
   double computeOrganKdTreeDistance(Organ& organ, KdTreePtr kdtree);
+  double computeStemDistance(Organ& stem1, Organ& stem2);
 
   // Organ Graph
   void classifyLeafStem(double smooth_cost, bool forward);

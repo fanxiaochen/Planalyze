@@ -113,7 +113,13 @@ void PointCloud::trimOrgans(bool is_leaf)
     {
       if (is_leaf)
         at(components[i][j]).label = PclRichPoint::LABEL_STEM;
-      at(components[i][j]).organ_id = PclRichPoint::ID_UNINITIALIZED;
+      else
+      {
+        if (      at(components[i][j]).label == PclRichPoint::LABEL_STEM)
+        {         at(components[i][j]).organ_id = PclRichPoint::ID_UNINITIALIZED;
+        }
+      }
+
     }
   }
 

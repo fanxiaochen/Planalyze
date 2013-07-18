@@ -906,8 +906,6 @@ void FileSystemModel::navigateToPreviousFrame(NavigationType type)
 
 void FileSystemModel::navigateToNextFrame(NavigationType type)
 {
-  //getPointCloud(501)->expire();
-
   int last_frame, last_view;
   getDisplayFirstFrameLastView(last_frame, last_view);
 
